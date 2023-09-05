@@ -1,22 +1,15 @@
 import './App.css';
 import Panel from "./components/Panel";
 import Login from "./components/Login";
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
-    <Router>
       <div className="App">
           <div>
-            <Routes>
-              <Route path="/" element={<Panel/>}>
-              </Route>
-              <Route path="/login" element={<Login/>}>
-              </Route>
-            </Routes>
+            <Login/>
           </div>
       </div>
-    </Router>
   );
 }
 
