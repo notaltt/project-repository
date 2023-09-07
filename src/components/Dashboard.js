@@ -5,40 +5,16 @@ export default function Dashboard(){
     return(
         <div className="flex bg-white h-screen">  
            
-            <div className='class="flex flex-col flex-1 w-full"'>
-                <header className='z-10 py-4 bg-white shadow-md dark:bg-white'>
-                    
-                    <div class="flex  flex-1 lg:mr-32">
-                    <a className='mr-10 align-right flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="/dashboard">
-                            <img
-                            className="ml-5 mr-5 h-6 w-auto "
-                            src={myImage}/>
-                            <h1>PRIVO</h1>
-                        </a>
-                        <div class=" justify-content relative w-full max-w-xl mr-6 focus-within:text-purple-500">
-                            <div class="absolute inset-y-0 flex items-center pl-2">
-                            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-                            </svg>
-                            </div>
-                            <input class="w-full pl-8 pr-2 text-large text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 dark:bg-gray-200 dark:text-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input" type="text" placeholder="Search" aria-label="Search"></input>
-                        </div>  
-                    </div> 
-                </header>
-                <main>
-                    {/* put code what is inside the content page */}
-                </main>
-            </div>
             <aside className='z-20 hidden w-64 overflow-y-auto bg-white dark:bg-sky-100   md:block flex-shrink-0' >
                 
                 <div className='py-4 text-black dark:text-black'>
 
-                        {/* <a className='ml-4 flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="/dashboard">
+                        <a className='ml-4 flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="/dashboard">
                             <img
                             className="mr-5 h-6 w-auto "
                             src={myImage}/>
                             <h1>PRIVO</h1>
-                        </a> */}
+                        </a>
                         
                     <ul class="mt-6">
                         <li className="relative px-6 py-3">
@@ -68,18 +44,34 @@ export default function Dashboard(){
                             <span className="ml-4">Team</span>
                         </a>
                         </li>
-                        <li className="relative px-6 py-3">
-                        <a className="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-blue-400" href="#">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                            </svg>
-                            <span className="ml-4">Archive</span>
-                        </a>
-                        </li>
+                        
                     </ul>
                 </div>
-                
             </aside>
+            <div className='flex flex-col flex-1 w-full"'>
+                <header className='justify-content z-10 py-4 bg-white shadow-md dark:bg-white'>
+                    
+                <div class="flex justify-center flex-1 lg:mr-32">
+                        {/* <a className='mr-10 align-right flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="/dashboard">
+                            <img
+                            className="ml-5 mr-5 h-6 w-auto "
+                            src={myImage}/>
+                            <h1>PRIVO</h1>
+                        </a> */}
+                        <div class="  relative w-full max-w-xl mr-6 focus-within:text-purple-500">
+                            <div class="absolute inset-y-0 flex items-center pl-2">
+                            <svg class="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                            </svg>
+                            </div>
+                            <input class="w-full pl-8 pr-2 text-large text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 dark:bg-gray-200 dark:text-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input" type="text" placeholder="Search" aria-label="Search"></input>
+                        </div>  
+                    </div> 
+                </header>
+                <main>
+                    {/* put code what is inside the content page */} 
+                </main>
+            </div>
         </div>
        
     );
