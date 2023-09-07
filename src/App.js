@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import Files from "./components/Files"
 import Team from "./components/Team"
+import Register from "./components/Register"
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
       <div className="App">
           <div>
             <Routes>
-              <Route path="/" element={<Panel/>}>
+              <Route path="/" element={<Register/>}>
               </Route>
               <Route path="/login" element={<Login/>}>
               </Route>
@@ -21,6 +22,8 @@ function App() {
               <Route path="/files" element={<Files/>}>
               </Route>
               <Route path="/team" element={<Team/>}>
+              </Route>
+              <Route path="/register" element={<Register/>}>
               </Route>
             </Routes>
           </div>
