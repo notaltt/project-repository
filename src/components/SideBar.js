@@ -47,7 +47,7 @@ export default function Register(){
                                     : 'dark:hover:text-blue-400'
                                 }`}
                                 href={item.href}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" class="w-6 h-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d={item.d} />
                                 </svg>
                                 <span className="ml-4">{item.title}</span>
