@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import SideBar from './SideBar';
+import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
 
@@ -86,6 +87,7 @@ export default function Files(){
                             </div>
                             <input class="w-full pl-8 pr-2 text-large text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 dark:bg-gray-200 dark:text-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input" type="text" placeholder="Search" aria-label="Search"></input>
                         </div>  
+                        <Profile/>
                     </div> 
                 </header>
                 <main classname="bg-gray-100">

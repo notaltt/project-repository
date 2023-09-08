@@ -52,7 +52,7 @@ export default function Register(){
                                 </svg>
                                 <span className="ml-4">{item.title}</span>
                             </a>
-                        </li>
+                        </li>       
                     ))}
                 </ul>
             </div>

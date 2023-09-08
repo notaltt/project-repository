@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import SideBar from './SideBar';
-
+import Profile from './Profile-Menu';
+import profile from '../images/profile-picture-5.jpg'
 const teams = [
     {
         name: 'Data Wranglers',
@@ -86,7 +87,9 @@ const people = [
     },
 ]
 
+
 export default function Dashboard(){
+    const [open,setOpen] = useState(false)
     return(
         <div className="flex bg-white">  
            
@@ -95,7 +98,7 @@ export default function Dashboard(){
             <div className='flex flex-col flex-1 w-full"'>
                 <header className='justify-content z-10 py-4 bg-white shadow-md dark:bg-white'>
                     
-                <div className="flex justify-center flex-1 lg:mr-32">
+                    <div className="flex justify-center flex-1 lg:mr-32">
                         <div className="  relative w-full max-w-xl mr-6 focus-within:text-purple-500">
                             <div className="absolute inset-y-0 flex items-center pl-2">
                             <svg className="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
@@ -104,6 +107,9 @@ export default function Dashboard(){
                             </div>
                             <input className="w-full pl-8 pr-2 text-large text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 dark:bg-gray-200 dark:text-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input" type="text" placeholder="Search" aria-label="Search"></input>
                         </div>  
+                        
+                        <Profile/>
+
                     </div> 
                 </header>
                 <main>
@@ -171,4 +177,12 @@ export default function Dashboard(){
         </div>
        
     );
+}
+function DropdownItem(props){
+    return(
+        <li>
+            <img src={props.img}></img>
+            <a href={props.href}>{props.text}</a>
+        </li>
+    )
 }
