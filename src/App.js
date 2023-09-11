@@ -29,6 +29,4 @@ function App() {
   );
 }
 
-exports.build = series(scssTask, jsTask);
-
 export default App;
