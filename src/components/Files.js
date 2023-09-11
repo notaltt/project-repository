@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import SideBar from './SideBar';
+import FileUpload from './FileUpload';
 import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
@@ -108,6 +109,8 @@ export default function Files(){
                             </div>);
                         })}
                     </div>
+
+                    <FileUpload/>
                 </main>
             </div>
         </div>
