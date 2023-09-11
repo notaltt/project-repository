@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
 import SideBar from './SideBar';
 import Profile from './Profile-Menu';
-import profile from '../images/profile-picture-5.jpg'
+
 const teams = [
     {
         name: 'Data Wranglers',
@@ -89,7 +88,6 @@ const people = [
 
 
 export default function Dashboard(){
-    const [open,setOpen] = useState(false)
     return(
         <div className="flex bg-white">  
            
@@ -143,7 +141,7 @@ export default function Dashboard(){
                         </div>
                     </div>
 
-                    <ul role="list" className="divide-y divide-gray-100 px-6 bg-gray-100 mt-10">
+                    <ul className="divide-y divide-gray-100 px-6 bg-gray-100 mt-10">
                             <h2 className="text-3xl font-bold text-black-700 opacity-70 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Notifications</h2>
                         {people.map((person) => (
                             <li key={person.message} className="flex justify-between gap-x-6 py-5  pe-6">
@@ -177,12 +175,4 @@ export default function Dashboard(){
         </div>
        
     );
-}
-function DropdownItem(props){
-    return(
-        <li>
-            <img src={props.img}></img>
-            <a href={props.href}>{props.text}</a>
-        </li>
-    )
 }

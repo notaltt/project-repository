@@ -30,6 +30,7 @@ export default function SideBar(){
                 <a className='ml-4 flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="dashboard">
                     <img
                     className="mr-5 h-6 w-auto "
+                    alt='privo'
                     src={myImage}/>
                     <h1 className="text-2xl">PRIVO</h1>
                 </a>
