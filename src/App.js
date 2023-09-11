@@ -12,15 +12,15 @@ function App() {
       <div className="App">
           <div>
             <Routes>
-              <Route path="project-repository/" element={<Panel/>}>
+              <Route path="/" element={<Panel/>}>
               </Route>
-              <Route path="project-repository/login" element={<Login/>}>
+              <Route path="/login" element={<Login/>}>
               </Route>
-              <Route path="project-repository/dashboard" element={<Dashboard/>}>
+              <Route path="/dashboard" element={<Dashboard/>}>
               </Route>
-              <Route path="project-repository/files" element={<Files/>}>
+              <Route path="/files" element={<Files/>}>
               </Route>
-              <Route path="project-repository/team" element={<Team/>}>
+              <Route path="/team" element={<Team/>}>
               </Route>
             </Routes>
           </div>
