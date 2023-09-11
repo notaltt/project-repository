@@ -23,7 +23,7 @@ const navigation = [
     },
 ]
 
-export default function Register(){
+export default function SideBar(){
     return (
         <aside className='z-20  w-64 overflow-y-auto bg-white dark:bg-sky-100 md:block flex-shrink-0 sticky' >
             <div className='py-4 text-black dark:text-black'>
