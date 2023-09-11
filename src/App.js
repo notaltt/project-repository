@@ -16,11 +16,11 @@ function App() {
               </Route>
               <Route path="project-repository/login" element={<Login/>}>
               </Route>
-              <Route path="/dashboard" element={<Dashboard/>}>
+              <Route path="project-repository/dashboard" element={<Dashboard/>}>
               </Route>
-              <Route path="/files" element={<Files/>}>
+              <Route path="project-repository/files" element={<Files/>}>
               </Route>
-              <Route path="/team" element={<Team/>}>
+              <Route path="project-repository/team" element={<Team/>}>
               </Route>
             </Routes>
           </div>

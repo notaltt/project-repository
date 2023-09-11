@@ -1,38 +1,5 @@
-// import React, { useRef, useEffect } from 'react';
 
 export default function Panel() {
-  // const circleRef = useRef(null);
-
-  // useEffect(() => {
-  //   const circle = circleRef.current;
-    
-  //   // Calculate the initial position of the circle
-  //   const circleRect = circle.getBoundingClientRect();
-  //   const circleCenterX = circleRect.left + circleRect.width / 2;
-  //   const circleCenterY = circleRect.top + circleRect.height / 2;
-
-  //   // Add a mousemove event listener to update the circle's position
-  //   const handleMouseMove = (e) => {
-  //     const mouseX = e.clientX;
-  //     const mouseY = e.clientY;
-
-  //     // Calculate the distance between the mouse cursor and the circle's center
-  //     const deltaX = mouseX - circleCenterX;
-  //     const deltaY = mouseY - circleCenterY;
-
-  //     // Apply a translation based on the mouse cursor position
-  //     circle.cx = circleCenterX;
-  //     circle.cy = circleCenterY;
-  //   };
-
-  //   document.addEventListener('mousemove', handleMouseMove);
-
-  //   return () => {
-  //     // Remove the event listener when the component unmounts
-  //     document.removeEventListener('mousemove', handleMouseMove);
-  //   };
-  // }, []);
-
   return (
     <div className="bg-slate-800 h-screen">
       <div className="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
@@ -43,7 +10,6 @@ export default function Panel() {
             aria-hidden="true"
           >
             <circle
-              // ref={circleRef}
               cx={512}
               cy={512}
               r={512}
@@ -68,13 +34,13 @@ export default function Panel() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
               <a
-                href="/login"
+                href="project-repository/login"
                 className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Get started
               </a>
               <a
-                href="/dashboard" className="text-sm font-semibold leading-6 text-white">
+                href="project-repository/dashboard" className="text-sm font-semibold leading-6 text-white">
                 View Demo <span aria-hidden="true">→</span>
               </a>
             </div>
