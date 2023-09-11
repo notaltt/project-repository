@@ -1,38 +1,5 @@
-// import React, { useRef, useEffect } from 'react';
 
 export default function Panel() {
-  // const circleRef = useRef(null);
-
-  // useEffect(() => {
-  //   const circle = circleRef.current;
-    
-  //   // Calculate the initial position of the circle
-  //   const circleRect = circle.getBoundingClientRect();
-  //   const circleCenterX = circleRect.left + circleRect.width / 2;
-  //   const circleCenterY = circleRect.top + circleRect.height / 2;
-
-  //   // Add a mousemove event listener to update the circle's position
-  //   const handleMouseMove = (e) => {
-  //     const mouseX = e.clientX;
-  //     const mouseY = e.clientY;
-
-  //     // Calculate the distance between the mouse cursor and the circle's center
-  //     const deltaX = mouseX - circleCenterX;
-  //     const deltaY = mouseY - circleCenterY;
-
-  //     // Apply a translation based on the mouse cursor position
-  //     circle.cx = circleCenterX;
-  //     circle.cy = circleCenterY;
-  //   };
-
-  //   document.addEventListener('mousemove', handleMouseMove);
-
-  //   return () => {
-  //     // Remove the event listener when the component unmounts
-  //     document.removeEventListener('mousemove', handleMouseMove);
-  //   };
-  // }, []);
-
   return (
     <div className="bg-slate-800 h-screen">
       <div className="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">
@@ -43,7 +10,6 @@ export default function Panel() {
             aria-hidden="true"
           >
             <circle
-              // ref={circleRef}
               cx={512}
               cy={512}
               r={512}
