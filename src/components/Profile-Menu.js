@@ -1,5 +1,3 @@
-                       
-                       
       import React, { useState } from 'react';
       import profile from '../images/profile-picture-5.jpg'
       
@@ -10,7 +8,7 @@
           return(
             <div className='menu-contianer'>
             <div className='menu-trigger' onClick={()=>{setOpen(!open)}}>
-                <img src={profile}></img>
+                <img alt='profile' src={profile}></img>
             </div>
             <div className={`bg-blue-400 dropdown-menu ${open? 'active' : 'inactive'}`} >
                 <h3>Kent<br></br><span>Web Designer</span></h3>
@@ -26,7 +24,7 @@
       function DropdownItem(props){
           return(
               <li>
-                  <img src={props.img}></img>
+                  <img alt='' src={props.img}></img>
                   <a href={props.href}>{props.text}</a>
               </li>
           )

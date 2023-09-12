@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import myImage from '../images/logo.png';
 
 export default function Login() {
@@ -40,7 +39,7 @@ export default function Login() {
                   Password
                 </label>
                 <div className="text-sm">
-                  <a href="#" className="font-semibold text-blue-600 hover:text-blue-500">
+                  <a href="login" className="font-semibold text-blue-600 hover:text-blue-500">
                     Forgot password?
                   </a>
                 </div>

@@ -1,29 +1,8 @@
-import React, { useState } from 'react';
 import SideBar from './SideBar';
+import FileUpload from './FileUpload';
 import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
-
-const navigation = [
-    {
-        title: 'Home',
-        d: 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
-        href: '/dashboard',
-        active: false
-    },
-    {
-        title: 'Files',
-        d: 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z',
-        href: '/files',
-        active: true
-    },
-    {
-        title: 'Team',
-        d: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
-        href: '/team',
-        active: false
-    },
-]
 
 const directory = [
     {
@@ -74,7 +53,7 @@ export default function Files(){
                 <header className='z-10 py-4 bg-white shadow-md dark:bg-white'>
                     
                 <div class="flex justify-start flex-1 lg:mr-32">
-                        <a className='ml-20'>
+                        <a href="files" className='ml-20'>
                             <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">View Recent Activity</button>
                         </a>
                             <span class="relative top-0 right-0 h-3 w-3 bg-red-600 d-500 rounded-full -translate-x-4 -translate-y-0.5"></span>
@@ -102,12 +81,14 @@ export default function Files(){
                             
                             return (
                             <div key={content.description} className="bg-white shadow-md rounded-lg p-6 group relative">
-                                <img className="h-52 w-auto mx-auto" src={imgSrc}/>
+                                <img alt={content.name} className="h-52 w-auto mx-auto" src={imgSrc}/>
                                 <h2 className="text-xl font-bold opacity-80">{content.name}</h2>
                                 <p className="text-gray-600">{fileDescription}</p>
                             </div>);
                         })}
                     </div>
+
+                    <FileUpload/>
                 </main>
             </div>
         </div>
