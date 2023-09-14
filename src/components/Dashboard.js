@@ -1,5 +1,6 @@
 import SideBar from './SideBar';
 import Profile from './Profile-Menu';
+import React, { useState } from 'react';
 
 const teams = [
     {
@@ -88,16 +89,30 @@ const people = [
 
 
 export default function Dashboard(){
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const toggleSidebar = () => {
+      setIsSidebarOpen(!isSidebarOpen);
+    }
+  
     return(
         <div className="flex bg-white">  
            
-            <SideBar/>
+            <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
             
             <div className='flex flex-col flex-1 w-full"'>
+           
                 <header className='justify-content z-10 py-4 bg-white shadow-md dark:bg-white'>
-                    
-                    <div className="flex justify-center flex-1 lg:mr-32">
-                        <div className="  relative w-full max-w-xl mr-6 focus-within:text-purple-500">
+                
+                    <div className="flex md:justify-center flex-1 lg:mr-32">
+                        <div>
+                            <button className="mr-10 ml-3 rounded-lg bg-blue-200 md:hidden block  text-black p-2" onClick={toggleSidebar}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className=" relative w-64 md:w-full max-w-xl mr-6 focus-within:text-purple-500">
                             <div className="absolute inset-y-0 flex items-center pl-2">
                             <svg className="w-4 h-4" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>

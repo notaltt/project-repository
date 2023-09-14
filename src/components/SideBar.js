@@ -21,20 +21,38 @@ const navigation = [
         href: '/team',
         active: currentPathname === '/team',
     },
+    
 ]
 
-export default function SideBar(){
+const SideBar = ({ isOpen, toggleSidebar }) =>{
     return (
-        <aside className='z-20  w-64 overflow-y-auto bg-white dark:bg-sky-100 md:block flex-shrink-0 sticky' >
+        
+        <aside className={`z-50 sm:sticky  absolute rounded-xl bg-cover w-64 bg-gradient-to-r from-blue-200 to-cyan-200 dark:bg-sky-100  md:block flex-shrink-0  ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`} >
+                
             <div className='py-4 text-black dark:text-black'>
-                <a className='ml-4 flex items-center text-xl font-bold text-blue-800 dark:text-blue-500' href="dashboard">
+                
+            
+                <div className='flex'>
+                <a className='ml-4 ' href="dashboard">
                     <img
-                    className="mr-5 h-6 w-auto "
+                    className="mr-2 h-6 "
                     alt='privo'
                     src={myImage}/>
-                    <h1 className="text-2xl">PRIVO</h1>
+                       
                 </a>
+                    <a href="dashboard">
+                        <h1 className='font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-800 to-blue-800'>PRIVO</h1>
+                    </a>
+                    <button className="rounded-xl ml-20 block md:hidden p-1      hover:bg-blue-300 text-black" onClick={toggleSidebar}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                     
+                
+                </div>
+                
+                
                 <ul className="mt-6">
                     {navigation.map((item) => (
                         <li className="relative px-6 py-3">
@@ -44,8 +62,8 @@ export default function SideBar(){
                             <a
                                 className={`inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 ${
                                 item.active
-                                    ? 'dark:hover:text-blue-200 dark:text-blue-400'
-                                    : 'dark:hover:text-blue-400'
+                                    ? 'dark:hover:text-blue-200 dark:text-purple-800'
+                                    : 'dark:hover:text-red-400'
                                 }`}
                                 href={item.href}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
@@ -53,10 +71,13 @@ export default function SideBar(){
                                 </svg>
                                 <span className="ml-4">{item.title}</span>
                             </a>
-                        </li>       
+                        </li>    
+                           
                     ))}
                 </ul>
             </div>
         </aside>
     );
 }
+
+export default SideBar;

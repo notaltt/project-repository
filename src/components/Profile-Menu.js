@@ -10,7 +10,7 @@
             <div className='menu-trigger' onClick={()=>{setOpen(!open)}}>
                 <img alt='profile' src={profile}></img>
             </div>
-            <div className={`bg-blue-400 dropdown-menu ${open? 'active' : 'inactive'}`} >
+            <div className={`dropdown-menu   ${open? 'active' : 'inactive'}`} >
                 <h3>Kent<br></br><span>Web Designer</span></h3>
                 <ul>
                     <DropdownItem text = {"My Profile"}/>
