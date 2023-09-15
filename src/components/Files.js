@@ -4,6 +4,7 @@ import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
 
+
 const directory = [
     {
         name: 'important files',
@@ -87,7 +88,6 @@ export default function Files(){
                             </div>);
                         })}
                     </div>
-
                     <FileUpload/>
                 </main>
             </div>
