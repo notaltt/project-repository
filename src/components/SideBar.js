@@ -27,24 +27,24 @@ const navigation = [
 const SideBar = ({ isOpen, toggleSidebar }) =>{
     return (
         
-        <aside className={`z-50 sm:sticky  absolute rounded-xl bg-cover w-64 bg-gradient-to-r from-blue-200 to-cyan-200 dark:bg-sky-100  md:block flex-shrink-0  ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`} >
+        <aside className={`z-50 text-black dark:text-white sm:sticky w-screen h-screen absolute bg-sky-200 sm:w-64 sm:h-auto  dark:bg-gray-900  md:block flex-shrink-0  ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`} >
                 
-            <div className='py-4 text-black dark:text-black'>
+            <div className='py-4 '>
                 
             
                 <div className='flex'>
-                <a className='ml-4 ' href="dashboard">
-                    <img
-                    className="mr-2 h-6 "
-                    alt='privo'
-                    src={myImage}/>
-                       
-                </a>
+                    <a className='ml-4 ' href="dashboard">
+                        <img
+                        className="mr-2 h-6 "
+                        alt='privo'
+                        src={myImage}/>
+                        
+                    </a>
                     <a href="dashboard">
                         <h1 className='font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-800 to-blue-800'>PRIVO</h1>
                     </a>
-                    <button className="rounded-xl ml-20 block md:hidden p-1      hover:bg-blue-300 text-black" onClick={toggleSidebar}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <button className="rounded-xl ml-64 block md:hidden p-1 dark:text-white hover:bg-blue-300 text-black" onClick={toggleSidebar}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -53,7 +53,7 @@ const SideBar = ({ isOpen, toggleSidebar }) =>{
                 </div>
                 
                 
-                <ul className="mt-6">
+                <ul className=" mt-6">
                     {navigation.map((item) => (
                         <li className="relative px-6 py-3">
                             {item.active && (
