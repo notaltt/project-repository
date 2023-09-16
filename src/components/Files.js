@@ -4,6 +4,8 @@ import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
 import DarkMode from './DarkMode';
+import FileList from './FileList';
+import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import { useState } from 'react';
 
 
@@ -48,6 +50,11 @@ const directory = [
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [fileUploadActive, setFileUploadActive] = useState(false);
+
+    const toggleFileUpload = () => {
+        setFileUploadActive(!fileUploadActive);
+    };
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
@@ -85,10 +92,17 @@ export default function Files(){
 
                 </div> 
             </header>
-                <main classname="bg-gray-100 ">
+                <main>
+                    <button onClick={toggleFileUpload} title="Upload" class="fixed z-90 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
+                        <span className="text-white">
+                            <CloudIcon stroke="currentColor" />
+                        </span>
+                    </button>
+                    <FileUpload isVisible={fileUploadActive} />
+                    <FileList/>
                     {/* put code what is inside the content page */}
                     
-                    <div className="dark:bg-gray-900 space-y-12 py-4 px-4 lg:grid lg:grid-cols-4 lg:gap-x-6 lg:gap-y-6 lg:space-y-0">
+                    {/* <div className="dark:bg-gray-900 space-y-12 py-4 px-4 lg:grid lg:grid-cols-4 lg:gap-x-6 lg:gap-y-6 lg:space-y-0">
                         {directory.map((content) => {
                             
                             const hasFileExtension = content.name.includes('.');
@@ -102,9 +116,7 @@ export default function Files(){
                                 <p className="text-gray-600 dark:text-gray-100">{fileDescription}</p>
                             </div>);
                         })}
-                    </div>
-
-                    <FileUpload/>
+                    </div> */}
                 </main>
             </div>
         </div>
