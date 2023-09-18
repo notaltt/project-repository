@@ -5,6 +5,7 @@ import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
 import DarkMode from './DarkMode';
 import FileList from './FileList';
+import FileDetail from './FileDetails'
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import { useState } from 'react';
 
