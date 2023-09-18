@@ -8,6 +8,7 @@ export default function FileList(){
   const [loading, setLoading] = useState(false);
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
+  const [open,setOpen] = useState(false)
 
 
   useEffect(() => {
@@ -113,8 +114,15 @@ export default function FileList(){
                     </div>
                     <div className='flex justify-between'>
                       <h1>{file.type}</h1>
-                      <div className='cursor-pointer pr-10' onClick={() => downloadFile(file.name)}>
+                      <div className='cursor-pointer pr-10' onClick={()=>{setOpen(!open)}}>
                         <Ellipsis/>
+                      </div>
+                      <div className={`context-window  ${open? 'active' : 'inactive'}`} >
+                          <h3>Kent<br></br><span>Web Designer</span></h3>
+                          <ul>
+                              <DropdownItem text = {"Preview Files"} href ={"/files"}/>
+                              <DropdownItem text = {"File Details"} href = {"/FileDetails"}/>
+                          </ul>
                       </div>
                     </div>
                   </div>
@@ -132,3 +140,11 @@ export default function FileList(){
     </div>
   )
 }
+function DropdownItem(props){
+  return(
+      <li>
+          <img alt='' src={props.img}></img>
+          <a href={props.href}>{props.text}</a>
+      </li>
+  )
+}  
