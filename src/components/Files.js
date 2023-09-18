@@ -4,6 +4,7 @@ import Profile from './Profile-Menu';
 import folder from  '../images/folder.png';
 import text from  '../images/text.webp';
 import DarkMode from './DarkMode';
+import FileDetail from './FileDetails'
 import FileList from './FileList';
 import FileDetail from './FileDetails'
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
@@ -85,13 +86,10 @@ export default function Files(){
                         </div>
                         <input className="w-full pl-8 pr-2 text-large dark:text-black    text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 dark:bg-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input" type="text" placeholder="Search" aria-label="Search"></input>
                     </div> 
-
-                    <FileDetail/>
                     <div className='mt-1'>
                         <DarkMode/>
                     </div> 
                     <Profile/>
-
                 </div> 
             </header>
                 <main>

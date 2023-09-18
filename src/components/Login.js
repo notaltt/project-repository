@@ -4,12 +4,14 @@ import DarkMode from './DarkMode';
 export default function Login() {
   return (
     <>
-        <div className='absolute justify-right'>
-          <DarkMode/> 
-        </div>
-    
-      <div className="flex flex-1 h-screen dark:bg-gray-900 bg-white flex-col px-6 py-12 lg:px-8">
-      
+        
+       
+      <div className="flex relative flex-1 h-screen dark:bg-gray-900 bg-white flex-col px-6 py-12 lg:px-8">
+           <div className='absolute right-5 top-5'>
+           <DarkMode/> 
+           </div>
+                      
+        <div className='mt-40'>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img
             className="mx-auto h-10 w-auto"
@@ -79,7 +81,10 @@ export default function Login() {
             </a>
           </p>
         </div>
+        </div>
+        
       </div>
+      
     </>
   )
 }
