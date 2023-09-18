@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -14,7 +14,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-const firestore = firebase.firestore();
+const firestore = getFirestore(app);
 const storage = getStorage(app);
 
 const createUser = (collectionName, data) => {
@@ -34,3 +34,4 @@ const deleteData = (collectionName, userId) =>{
 }
 
 export {createUser, readUser, updateUser, deleteData};
+export default storage;
