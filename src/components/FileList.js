@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata} from "firebase/storage"
+import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
 
 export default function FileList(){
   const [listFile, setListFile] = useState([]);
@@ -47,6 +48,11 @@ export default function FileList(){
     e.preventDefault();
   }
 
+  //for ellipsis events
+  function handleEllipsis(){
+
+  }
+
   return (
     <div>
       <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
@@ -77,8 +83,11 @@ export default function FileList(){
                     <div className='flex'>
                       <h1>{humanFileSize(file.size)}</h1>
                     </div>
-                    <div className='flex'>
+                    <div className='flex justify-between'>
                       <h1>{file.type}</h1>
+                      <div className='cursor-pointer pr-10' onClick={handleEllipsis}>
+                        <Ellipsis/>
+                      </div>
                     </div>
                   </div>
                 </div>
