@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
+import { type } from '@testing-library/user-event/dist/type';
 
 export default function FileList(){
   const [listFile, setListFile] = useState([]);
@@ -69,14 +70,23 @@ export default function FileList(){
 
   }
 
+  function fileTypeRename(typeName){
+    if("application/vnd.openxmlformats-officedocument.wordprocessingml.document" === typeName){
+      return "application/docx";
+    }
+
+    if("application/vnd.oasis.opendocument.text" == typeName){
+      return "application/odt";
+    }
+    return typeName;
+  }
+
   //right click events should be made here
   // function handleRightClickEvent(e, file){
   //   e.preventDefault();
   //   setContextMenuPosition({ top: e.clientY, left: e.clientX });
   //   setContextMenuVisible(true);
   // }
-
-
 
   //for ellipsis events
   function handleEllipsis(){
@@ -113,17 +123,17 @@ export default function FileList(){
                       <h1>{humanFileSize(file.size)}</h1>
                     </div>
                     <div className='flex justify-between'>
-                      <h1>{file.type}</h1>
-                      <div className='cursor-pointer pr-10' onClick={()=>{setOpen(!open)}}>
+                      <h1>{fileTypeRename(file.type)}</h1>
+                      <div className='cursor-pointer pr-10'>
                         <Ellipsis/>
                       </div>
-                      <div className={`context-window  ${open? 'active' : 'inactive'}`} >
+                      {/* <div className={`context-window  ${open? 'active' : 'inactive'}`} >
                           <h3>Kent<br></br><span>Web Designer</span></h3>
                           <ul>
                               <DropdownItem text = {"Preview Files"} href ={"/files"}/>
                               <DropdownItem text = {"File Details"} href = {"/FileDetails"}/>
                           </ul>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -132,7 +142,8 @@ export default function FileList(){
         </ul>
         )}
 
-        {/* {contextMenuVisible && (
+
+        {/*= {contextMenuVisible && (
           <div className='bg-gray-100 text-black p-2 absolute' style={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}>
             <h1 className='cursor-pointer' onClick={() => downloadFile(file)}>Download</h1>
           </div>
