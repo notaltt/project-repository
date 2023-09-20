@@ -104,7 +104,7 @@ export default function FileUpload({isVisible, height}){
 
   return (
     <div className="relative">
-      <div className="absolute right-0 z-50">
+      <div className="bg-white absolute right-0 z-50">
         <div className={`max-h-[auto] w-[600px] overflow-y-auto p-4 border border-gray-300 transition-opacity duration-300 ${isVisible ? 'w-[600px]' : 'hidden'}`}>
         <label for="dropzone-file" className={`${dragActive ? "bg-blue-100 border-blue-500":"bg-blue-50 border-blue-100"} w-full p-4 grid place-content-center cursor-pointer text-blue-500 rounded-lg
           border-4 border-dashed transition-colors`}

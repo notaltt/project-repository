@@ -7,30 +7,21 @@ import { type } from '@testing-library/user-event/dist/type';
 export default function FileList(){
   const [listFile, setListFile] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [contextMenuVisible, setContextMenuVisible] = useState(false);
-  const [contextMenuPosition, setContextMenuPosition] = useState({ top: 0, left: 0 });
-  const [open,setOpen] = useState(false)
-
+  const [ellipsisMenuVisible, setEllipsisMenuVisible] = useState(false);
+  const [ellipsisMenuPosition, setEllipsisMenuPosition] = useState({ top: 0, left: 0 });
+  const [selectedFile, setSelectedFile] = useState(null);
+  
 
   useEffect(() => {
     const listRef = ref(storage, 'team/sample/');
 
     setLoading(true);
 
-    function handleLeftClick(event){
-      if(event.button == 0){
-        setContextMenuVisible(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleLeftClick);
-
     listAll(listRef)
     .then(async (res) => {
       const files = [];
 
       for (const itemRef of res.items) {
-        const downloadURL = await getDownloadURL(itemRef);
         const metadata = await getMetadata(itemRef);
         files.push({
           name: itemRef.name,
@@ -45,10 +36,20 @@ export default function FileList(){
       console.error(error);
       setLoading(false);
     });
+  }, []);
 
-    return() => {
-      document.removeEventListener('mousedown', handleLeftClick);
-    };
+  useEffect(() =>{
+    function handleClickEvent(event){
+      if(event.button === 0){
+        setEllipsisMenuVisible(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickEvent);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickEvent)
+    }
   }, []);
 
   function humanFileSize(size){
@@ -81,24 +82,27 @@ export default function FileList(){
     return typeName;
   }
 
-  //right click events should be made here
-  // function handleRightClickEvent(e, file){
-  //   e.preventDefault();
-  //   setContextMenuPosition({ top: e.clientY, left: e.clientX });
-  //   setContextMenuVisible(true);
-  // }
+  function handleEllipsisClick(event, file) {
+    event.preventDefault();
+    const ellipsisIcon = event.currentTarget;
+    const ellipsisIconRect = ellipsisIcon.getBoundingClientRect();
+    const top = ellipsisIconRect.bottom; 
+    const left = ellipsisIconRect.left;
 
-  //for ellipsis events
-  function handleEllipsis(){
-
+    const adjustleft = left - 110;
+    
+    setEllipsisMenuPosition({ top, left:  adjustleft});
+    setSelectedFile(file);
+    setEllipsisMenuVisible(true);
   }
-
+  
   return (
     <div>
       <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
         <div className='flex'>
           <h1>Name</h1>
         </div>
+
         <div className='flex'>
           <h1>Size</h1>
         </div>
@@ -124,16 +128,9 @@ export default function FileList(){
                     </div>
                     <div className='flex justify-between'>
                       <h1>{fileTypeRename(file.type)}</h1>
-                      <div className='cursor-pointer pr-10'>
+                      <div className='cursor-pointer pr-10' onClick={(e) => handleEllipsisClick(e, file)}>
                         <Ellipsis/>
                       </div>
-                      {/* <div className={`context-window  ${open? 'active' : 'inactive'}`} >
-                          <h3>Kent<br></br><span>Web Designer</span></h3>
-                          <ul>
-                              <DropdownItem text = {"Preview Files"} href ={"/files"}/>
-                              <DropdownItem text = {"File Details"} href = {"/FileDetails"}/>
-                          </ul>
-                      </div> */}
                     </div>
                   </div>
                 </div>
@@ -142,20 +139,17 @@ export default function FileList(){
         </ul>
         )}
 
-
-        {/*= {contextMenuVisible && (
-          <div className='bg-gray-100 text-black p-2 absolute' style={{ top: contextMenuPosition.top, left: contextMenuPosition.left }}>
-            <h1 className='cursor-pointer' onClick={() => downloadFile(file)}>Download</h1>
+        {ellipsisMenuVisible && selectedFile && (
+          <div className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
+            <div className="bg-white border rounded shadow-md p-2">
+              <ul>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => downloadFile(selectedFile.name)}>Download</li>
+                <li className="px-4 py-2 cursor-pointer" >File Details</li>
+                <li className="px-4 py-2 cursor-pointer" >Preview File</li>
+              </ul>
+            </div>
           </div>
-        )} */}
+        )}
     </div>
   )
 }
-function DropdownItem(props){
-  return(
-      <li>
-          <img alt='' src={props.img}></img>
-          <a href={props.href}>{props.text}</a>
-      </li>
-  )
-}  
