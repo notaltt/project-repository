@@ -12,6 +12,9 @@ export default function FileList(){
   const [selectedFile, setSelectedFile] = useState(null);
   const ellipsisMenuContainer = document.getElementById('ellipsisMenuContainer');
   const [showFileDetail, setShowFileDetail] = useState(false);
+  const [view, setView] = useState(true);
+  const [file, setFile] = useState(null);
+  const [url, setUrl] = useState(null);
 
   
 
@@ -108,9 +111,29 @@ export default function FileList(){
       setEllipsisMenuVisible(true);
     }
   }
+
+  function onViewClick(file){
+    console.log("clicked")
+    setView(!view);
+    const storageRef = ref(storage, `team/sample/${file.name}`);
+    getDownloadURL(storageRef).then((url) =>{
+      setUrl(url);
+    }).catch((error) =>{
+      console.error('Error getting the url:', error);
+    });
+
+    setFile(file);
+
+    
+  }
+
+  function closeView(){
+    setView(!view);
+  }
   
   return (
-    <div>
+  <>
+  {view ?  <div>
       <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
         <div className='flex'>
           <h1>Name</h1>
@@ -212,11 +235,30 @@ export default function FileList(){
                   Download
                 </li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => setShowFileDetail(true)}>File Details</li>
-                <li className="px-4 py-2 cursor-pointer" >Preview File</li>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => onViewClick(selectedFile)}>Preview File</li>
               </ul>
             </div>
           </div>
         )}
     </div>
+    :
+    <>
+    {
+      file && file.type == "image/jpeg" ? 
+      <div>
+        <h1>Viewing {file.name}</h1>
+        <a href={file.url}>
+          <img src={file} alt="prof pic"/>
+        </a>
+        image/jpeg
+      </div> 
+      : 
+      <div>Error, file type cannot be rendered for now.</div>
+
+    }
+    <button className="px-4 py-2 cursor-pointer" onClick={closeView}>Go back</button>
+    </>
+  }
+  </>
   )
 }
