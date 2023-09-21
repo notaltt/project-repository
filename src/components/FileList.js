@@ -3,6 +3,7 @@ import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
 import { type } from '@testing-library/user-event/dist/type';
+import FileDetail from './FileDetails'
 
 export default function FileList(){
   const [listFile, setListFile] = useState([]);
@@ -10,7 +11,7 @@ export default function FileList(){
   const [ellipsisMenuVisible, setEllipsisMenuVisible] = useState(false);
   const [ellipsisMenuPosition, setEllipsisMenuPosition] = useState({ top: 0, left: 0 });
   const [selectedFile, setSelectedFile] = useState(null);
-  
+  const [showModal, setShowModal] = React.useState(false);
 
   useEffect(() => {
     const listRef = ref(storage, 'team/sample/');
@@ -61,6 +62,10 @@ export default function FileList(){
     );
   }
 
+  function Modal(fileName){
+    const storageRef = ref(storage, `team/sample/${fileName}`);
+    
+  }
   function downloadFile(fileName){
     const storageRef = ref(storage, `team/sample/${fileName}`);
     getDownloadURL(storageRef).then((url) =>{
@@ -144,8 +149,8 @@ export default function FileList(){
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => downloadFile(selectedFile.name)}>Download</li>
-                <li className="px-4 py-2 cursor-pointer" >File Details</li>
                 <li className="px-4 py-2 cursor-pointer" >Preview File</li>
+                <FileDetail/>
               </ul>
             </div>
           </div>
