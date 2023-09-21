@@ -98,24 +98,7 @@ export default function Files(){
                         </span>
                     </button>
                     <FileUpload isVisible={fileUploadActive} />
-                    <FileList/>
-                    {/* put code what is inside the content page */}
-                    
-                    {/* <div className="dark:bg-gray-900 space-y-12 py-4 px-4 lg:grid lg:grid-cols-4 lg:gap-x-6 lg:gap-y-6 lg:space-y-0">
-                        {directory.map((content) => {
-                            
-                            const hasFileExtension = content.name.includes('.');
-                            const imgSrc = hasFileExtension ? text : folder;
-                            const fileDescription = hasFileExtension ? 'text file' : 'folder';
-                            
-                            return (
-                            <div key={content.description} className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-6 group relative">
-                                <img alt={content.name} className="h-52 w-auto mx-auto " src={imgSrc}/>
-                                <h2 className=" dark:text-gray-100 text-xl font-bold opacity-80">{content.name}</h2>
-                                <p className="text-gray-600 dark:text-gray-100">{fileDescription}</p>
-                            </div>);
-                        })}
-                    </div> */}
+                    <FileList />
                 </main>
             </div>
         </div>

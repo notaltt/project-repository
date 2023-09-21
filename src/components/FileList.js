@@ -53,7 +53,7 @@ export default function FileList(){
   }, []);
 
   function humanFileSize(size){
-    const i = Math.floor(Math.log(size) / Math.log(1024));
+    const i = size==0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
     return (
         (size / Math.pow(1024, i)).toFixed(2) * 1 +
         " " +
@@ -76,7 +76,7 @@ export default function FileList(){
       return "application/docx";
     }
 
-    if("application/vnd.oasis.opendocument.text" == typeName){
+    if("application/vnd.oasis.opendocument.text" === typeName){
       return "application/odt";
     }
     return typeName;
@@ -97,7 +97,7 @@ export default function FileList(){
   }
   
   return (
-    <div>
+    <div className='dark:text-gray-200'>
       <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
         <div className='flex'>
           <h1>Name</h1>
@@ -119,7 +119,7 @@ export default function FileList(){
             ) : (
               listFile.map((file) => (
                 <div>
-                  <div key={file.name} className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
+                  <div key={file.name} className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 dark:hover:bg-slate-800 hover:bg-gray-200 bg-opacity-70'>
                     <div className='flex'>
                       <h1>{file.name}</h1>
                     </div>
