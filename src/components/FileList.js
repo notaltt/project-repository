@@ -10,6 +10,7 @@ export default function FileList(){
   const [ellipsisMenuVisible, setEllipsisMenuVisible] = useState(false);
   const [ellipsisMenuPosition, setEllipsisMenuPosition] = useState({ top: 0, left: 0 });
   const [selectedFile, setSelectedFile] = useState(null);
+  const ellipsisMenuContainer = document.getElementById('ellipsisMenuContainer');
   
 
   useEffect(() => {
@@ -40,7 +41,7 @@ export default function FileList(){
 
   useEffect(() =>{
     function handleClickEvent(event){
-      if(event.button === 0){
+      if(ellipsisMenuContainer && !ellipsisMenuContainer.contains(event.target)){
         setEllipsisMenuVisible(false);
       }
     }
@@ -84,16 +85,22 @@ export default function FileList(){
 
   function handleEllipsisClick(event, file) {
     event.preventDefault();
-    const ellipsisIcon = event.currentTarget;
-    const ellipsisIconRect = ellipsisIcon.getBoundingClientRect();
-    const top = ellipsisIconRect.bottom; 
-    const left = ellipsisIconRect.left;
 
-    const adjustleft = left - 110;
-    
-    setEllipsisMenuPosition({ top, left:  adjustleft});
-    setSelectedFile(file);
-    setEllipsisMenuVisible(true);
+    if(selectedFile === file){
+      setEllipsisMenuPosition(false);
+      setSelectedFile(null);
+    } else {
+      const ellipsisIcon = event.currentTarget;
+      const ellipsisIconRect = ellipsisIcon.getBoundingClientRect();
+      const top = ellipsisIconRect.bottom; 
+      const left = ellipsisIconRect.left;
+  
+      const adjustleft = left - 110;
+      
+      setEllipsisMenuPosition({ top, left:  adjustleft});
+      setSelectedFile(file);
+      setEllipsisMenuVisible(true);
+    }
   }
   
   return (
@@ -140,7 +147,7 @@ export default function FileList(){
         )}
 
         {ellipsisMenuVisible && selectedFile && (
-          <div className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
+          <div id="ellipsisMenuContainer" className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => downloadFile(selectedFile.name)}>Download</li>
