@@ -76,7 +76,7 @@ export default function FileList(){
       return "application/docx";
     }
 
-    if("application/vnd.oasis.opendocument.text" == typeName){
+    if("application/vnd.oasis.opendocument.text" === typeName){
       return "application/odt";
     }
     return typeName;
