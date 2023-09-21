@@ -146,13 +146,13 @@ export default function Dashboard(){
                                         className="h-full w-full object-cover object-center"
                                     />
                                     </div>
-                                    <h3 className="mt-6 text-sm dark:text-white text-gray-500">
+                                    <h3 className="p-3 text-sm dark:text-gray-400 text-gray-500">
+                                    <p className="text-base font-semibold dark:text-white text-gray-900">{team.name}</p>
                                     <a href={team.href}>
                                         <span className="absolute inset-0" />
                                         {team.description}
                                     </a>
                                     </h3>
-                                    <p className="text-base font-semibold dark:text-white text-gray-900">{team.name}</p>
                                 </div>
                                 ))}
                                 </div>
@@ -161,7 +161,7 @@ export default function Dashboard(){
                     </div>
 
                     <ul className="divide-y dark:divide-gray-100  divide-gray-100 px-6 dark:bg-gray-800 bg-gray-100 mt-10">
-                            <h2 className="text-3xl font-bold dark:text-white text-black-700 opacity-70 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Notifications</h2>
+                            <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Notifications</h2>
                         {people.map((person) => (
                             <li key={person.message} className="flex justify-between gap-x-6 py-5  pe-6">
                             <div className="flex min-w-0 bggap-x-4">

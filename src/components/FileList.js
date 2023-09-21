@@ -98,7 +98,7 @@ export default function FileList(){
   
   return (
     <div className='dark:text-gray-200'>
-      <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
+      <div id='file-header' className='h-full w-full grid grid-cols-3 pl-4 pt-3 pb-3 border-b border-gray-300 bg-slate-700 dark:bg-black bg-opacity-60 text-white font-bold'>
         <div className='flex'>
           <h1>Name</h1>
         </div>
@@ -111,7 +111,7 @@ export default function FileList(){
         </div>
       </div>
       {loading ? (
-        <p className='flex'>Loading...</p>
+        <p className='flex p-4'>Loading...</p>
       ) : (
         <ul>
           {listFile.length === 0 ? (
@@ -119,7 +119,7 @@ export default function FileList(){
             ) : (
               listFile.map((file) => (
                 <div>
-                  <div key={file.name} className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 dark:hover:bg-slate-800 hover:bg-gray-200 bg-opacity-70'>
+                  <div key={file.name} className='h-full w-full grid grid-cols-3 pl-4 pt-3 pb-3 border-b border-gray-300 dark:hover:bg-slate-800 hover:bg-gray-200 bg-opacity-70'>
                     <div className='flex'>
                       <h1>{file.name}</h1>
                     </div>
