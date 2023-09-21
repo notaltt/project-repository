@@ -60,7 +60,7 @@ export default function FileList(){
   }
 
   function humanFileSize(size){
-    const i = Math.floor(Math.log(size) / Math.log(1024));
+    const i = size==0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
     return (
         (size / Math.pow(1024, i)).toFixed(2) * 1 +
         " " +
@@ -201,7 +201,7 @@ export default function FileList(){
         )}
 
         {ellipsisMenuVisible && selectedFile && (
-          <div id="ellipsisMenuContainer" className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
+          <div className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
                 <li className="px-4 py-2 cursor-pointer" 
