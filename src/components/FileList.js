@@ -3,6 +3,8 @@ import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
 import { type } from '@testing-library/user-event/dist/type';
+import DocViewer, {DocViewerRenderers} from "@cyntler/react-doc-viewer";
+
 
 export default function FileList(){
   const [listFile, setListFile] = useState([]);
@@ -244,16 +246,75 @@ export default function FileList(){
     :
     <>
     {
-      file && file.type == "image/jpeg" ? 
+      file && file.type == "image/jpeg" || file.type == "image/png" ? 
       <div>
-        <h1>Viewing {file.name}</h1>
+        <h1>{file.name}</h1>
         <a href={file.url}>
-          <img src={file} alt="prof pic"/>
+          <img src={url} />
         </a>
-        image/jpeg
+        
+      </div>
+      : 
+      <div>
+        {/*  */}
+      </div>
+
+    }
+    {
+      file && file.type == "application/pdf" ? 
+      <div>
+        <h1>{file.name}</h1>
+        There seems to be an error rendering a PDF.
+        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        {window.open(url, '_blank')}
+        
+
       </div> 
       : 
-      <div>Error, file type cannot be rendered for now.</div>
+      <div>
+        {/*  */}
+      </div>
+
+    }
+    {
+      file && file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.type == "application/vnd.oasis.opendocument.text" ? 
+      <div>
+        <h1>{file.name}</h1>
+        There seems to be an error rendering a docx.
+        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        {window.open(url, '_blank')}
+
+      </div> 
+      : 
+      <div>
+        {/*  */}
+      </div>
+
+    }
+    {
+      file && file.type == "video/webm" ? 
+      <div>
+        <h1>{file.name}</h1>
+        <video src={url} controls />
+
+      </div> 
+      : 
+      <div>
+        {/*  */}
+      </div>
+
+    }
+    {
+      file && file.type == "audio/wav" ? 
+      <div>
+        <h1>{file.name}</h1>
+        <video src={url} controls />
+
+      </div> 
+      : 
+      <div>
+        {/*  */}
+      </div>
 
     }
     <button className="px-4 py-2 cursor-pointer" onClick={closeView}>Go back</button>
