@@ -317,6 +317,36 @@ export default function FileList(){
       </div>
 
     }
+    {
+      file && file.type == "application/docx" || file.type == "application/msword" || file.type == "application/odt" ? 
+      <div>
+        <h1>{file.name}</h1>
+        There seems to be an error rendering the file.
+        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        {window.open(url, '_blank')}
+
+      </div> 
+      : 
+      <div>
+        {/*  */}
+      </div>
+
+    }
+    {
+      file && file.type == "application/x-zip-compressed" || file.type == "application/epub+zip" ? 
+      <div>
+        <h1>{file.name}</h1>
+        There seems to be an error rendering the file.
+        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        {window.open(url, '_blank')}
+
+      </div> 
+      : 
+      <div>
+        {/*  */}
+      </div>
+
+    }
     <button className="px-4 py-2 cursor-pointer" onClick={closeView}>Go back</button>
     </>
   }
