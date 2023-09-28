@@ -119,6 +119,7 @@ export default function FileList(){
     setView(!view);
     const storageRef = ref(storage, `team/sample/${file.name}`);
     getDownloadURL(storageRef).then((url) =>{
+      console.log(url);
       setUrl(url);
     }).catch((error) =>{
       console.error('Error getting the url:', error);
@@ -280,8 +281,7 @@ export default function FileList(){
       file && file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || file.type == "application/vnd.oasis.opendocument.text" ? 
       <div>
         <h1>{file.name}</h1>
-        There seems to be an error rendering a docx.
-        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        Unable to preview, file downloaded automatically to view.
         {window.open(url, '_blank')}
 
       </div> 
@@ -321,8 +321,7 @@ export default function FileList(){
       file && file.type == "application/docx" || file.type == "application/msword" || file.type == "application/odt" ? 
       <div>
         <h1>{file.name}</h1>
-        There seems to be an error rendering the file.
-        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        Unable to preview, file downloaded automatically to view.
         {window.open(url, '_blank')}
 
       </div> 
@@ -336,8 +335,7 @@ export default function FileList(){
       file && file.type == "application/x-zip-compressed" || file.type == "application/epub+zip" ? 
       <div>
         <h1>{file.name}</h1>
-        There seems to be an error rendering the file.
-        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
+        Unable to preview, file downloaded automatically to view.
         {window.open(url, '_blank')}
 
       </div> 
