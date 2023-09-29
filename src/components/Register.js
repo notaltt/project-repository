@@ -1,7 +1,7 @@
 import myImage from '../images/logo.png';
 import React from "react";
 import DarkMode from './DarkMode';
-import { useState } from "react";
+import { useState } from 'react';
 import { db } from "./firebase";
 import FilterableSelect from "./FilterableSelect";
 
@@ -17,16 +17,19 @@ const options = [
   "Apple",
 ];
 
-export default function register() {
-  // const [input, setInput] = useState("");
+export default function Register() {
+  const [input, setInput] = useState("");
+  
+  const inputHandler = (e) =>{
+    setInput(e.target.value);
+  }
+
+  console.log(input)
 
   return (
     <>
-
-      {/* const inputHandler = (e) =>{
-        setInput(e.target.value);
-      } */}
       
+      <form onSubmit={(e)=>inputHandler(e)}>
       <div className="flex relative flex-1 h-screen dark:bg-gray-900 bg-white flex-col px-6 py-12 lg:px-8">
            <div className='absolute right-5 top-5'>
            <DarkMode/> 
@@ -165,6 +168,7 @@ export default function register() {
         </div>
         
       </div>
+      </form>
       
     </>
   )
