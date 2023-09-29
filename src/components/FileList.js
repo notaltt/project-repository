@@ -229,13 +229,7 @@ export default function FileList(){
           <div className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
-                <li className="px-4 py-2 cursor-pointer" 
-                    onClick={() => {
-                      console.log('Download button clicked'); // <-- log here
-                      downloadFile(selectedFile.name);
-                    }}>
-                  Download
-                </li>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => {downloadFile(selectedFile.name);}}>Download</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => setShowFileDetail(true)}>File Details</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => onViewClick(selectedFile)}>Preview File</li>
               </ul>
