@@ -1,52 +1,10 @@
 import SideBar from './SideBar';
 import FileUpload from './FileUpload';
 import Profile from './Profile-Menu';
-import folder from  '../images/folder.png';
-import text from  '../images/text.webp';
 import DarkMode from './DarkMode';
 import FileList from './FileList';
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import { useState } from 'react';
-
-
-const directory = [
-    {
-        name: 'important files',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johnnie Walker',
-        filesize: null,
-    },
-    {
-        name: 'top secret',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johnnie Walker',
-        filesize: null,
-    },
-    {
-        name: 'read_me.txt',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johnnie Walker',
-        filesize: 10000,
-    },
-    {
-        name: 'hello_world.txt',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johhnie Walker',
-        filesize: 10000,
-    },
-    {
-        name: 'road_to_graduation.txt',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johnnie Walker',
-        filesize: 10000,
-    },
-    {
-        name: 'team_sched.txt',
-        modified_last: 'September 6, 2023',
-        modified_by: 'Johnnie Walker',
-        filesize: 10000,
-    },
-]
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
