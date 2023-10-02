@@ -65,16 +65,16 @@ export default function Login() {
             </div>
 
             <div>
-              {/* <button
+              <button
                 href="/dashboard"
                 // type="submit"
                 className="flex w-full justify-center rounded-md dark:bg-purple-500 bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Sign in
-              </button> */}
-              <a href="/dashboard" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
+              </button>
+              {/* <a href="/dashboard" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
               Sign in.
-            </a>
+            </a> */}
             </div>
           </form>
 
