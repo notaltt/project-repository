@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import storage from './firebase';
-import { ref, listAll, getDownloadURL, getMetadata} from "firebase/storage"
+import { ref, listAll, getDownloadURL, getMetadata, uploadString} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
 import { type } from '@testing-library/user-event/dist/type';
 import DocViewer, {DocViewerRenderers} from "@cyntler/react-doc-viewer";
@@ -17,8 +17,7 @@ export default function FileList(){
   const [view, setView] = useState(true);
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState(null);
-
-  
+  const storageRef = ref(storage, 'team/sample/');
 
   useEffect(() => {
     const listRef = ref(storage, 'team/sample/');
@@ -133,6 +132,19 @@ export default function FileList(){
   function closeView(){
     setView(!view);
   }
+
+  async function createFolder(currentRef, folderName) {
+    const newDir = ref(currentRef, folderName);
+  
+    try {
+      const readmeFile = ref(newDir, 'readme.txt');
+      await uploadString(readmeFile, '');
+      
+      console.log(`Folder '${folderName}' created.`);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+    }
+  }
   
   return (
   <>
@@ -233,6 +245,7 @@ export default function FileList(){
                 <li className="px-4 py-2 cursor-pointer" onClick={() => {downloadFile(selectedFile.name);}}>Download</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => setShowFileDetail(true)}>File Details</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => onViewClick(selectedFile)}>Preview File</li>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => createFolder(storageRef, 'testCreate')}>Create Folder</li>
               </ul>
             </div>
           </div>

@@ -40,6 +40,8 @@ export default function FileUpload({isVisible, height}){
             });
 
             setFile((prevState) => prevState.filter((f) => f !== selectedFile));
+
+            window.location.reload();
           }
         );
       });
