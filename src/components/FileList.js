@@ -18,7 +18,6 @@ export default function FileList(){
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState(null);
 
-  
 
   useEffect(() => {
     const listRef = ref(storage, 'team/sample/');
@@ -198,8 +197,10 @@ export default function FileList(){
                   </div>
                   <div className="relative p-6 flex-auto">
                     <p className="my-4 text-slate-500 text-lg leading-relaxed">
-                      File type: {fileTypeRename(selectedFile.type)} <br />
-                      File size: {humanFileSize(selectedFile.size)} <br />
+                      File type: {fileTypeRename(selectedFile.type)} <br/>
+                      File size: {humanFileSize(selectedFile.size)} <br/>
+                      Modified by: <br/>
+                      Last Modified: <br/>
                       {/* Additional information */}
                     </p>
                   </div>

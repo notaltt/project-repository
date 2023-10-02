@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-function FilterableSelect({ options }) {
+
+function FilterableSelect({ options, onTeamChange, selectedTeam }) {
   const [searchTerm, setSearchTerm] = useState("");
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
@@ -19,7 +20,10 @@ function FilterableSelect({ options }) {
         value={searchTerm}
         onChange={handleInputChange}
       />
-      <select className="block w-full px-4 py-2 border rounded-lg mt-1">
+      <select className="block w-full px-4 py-2 border rounded-lg mt-1"
+      value={selectedTeam}
+      onChange={e => onTeamChange(e.target.value)}
+      >
         {filteredOptions.map((option, index) => (
           <option key={index} value={option}>
             {option}

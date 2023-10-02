@@ -35,3 +35,4 @@ const deleteData = (collectionName, userId) =>{
 
 export {createUser, readUser, updateUser, deleteData};
 export default storage;
+export { firestore };
