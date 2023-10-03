@@ -11,6 +11,8 @@ function FilterableSelect({ options, onTeamChange, selectedTeam }) {
     setSearchTerm(e.target.value);
   };
 
+
+
   return (
     <div className="relative">
       <input
@@ -22,7 +24,10 @@ function FilterableSelect({ options, onTeamChange, selectedTeam }) {
       />
       <select className="block w-full px-4 py-2 border rounded-lg mt-1"
       value={selectedTeam}
-      onChange={e => onTeamChange(e.target.value)}
+      onChange={e => {
+        console.log("Dropdown value changed:", e.target.value);
+        onTeamChange(e.target.value);
+    }}
       >
         {filteredOptions.map((option, index) => (
           <option key={index} value={option}>
