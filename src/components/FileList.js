@@ -22,27 +22,33 @@ export default function FileList(){
   useEffect(() => {
     const listRef = ref(storage, 'team/sample/');
 
-    setLoading(true);
-
     listAll(listRef)
-    .then(async (res) => {
-      const files = [];
+      .then(async (res) => {
+        const files = [];
 
-      for (const itemRef of res.items) {
-        const metadata = await getMetadata(itemRef);
-        files.push({
-          name: itemRef.name,
-          size: metadata.size,
-          type: metadata.contentType,
-        });
-      }
-      setListFile(files);
-      setLoading(false);
-    })
-    .catch((error) => {
-      console.error(error);
-      setLoading(false);
-    });
+        for (const prefixRef of res.prefixes) {
+          files.push({
+            name: prefixRef.name,
+            isFolder: true, 
+          });
+        }
+
+        for (const itemRef of res.items) {
+          const metadata = await getMetadata(itemRef);
+          files.push({
+            name: itemRef.name,
+            size: metadata.size,
+            type: metadata.contentType,
+          });
+        }
+
+        setListFile(files);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() =>{
@@ -65,6 +71,11 @@ export default function FileList(){
 
   function humanFileSize(size){
     const i = size==0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+
+    if("NaN undefined" === size){
+      return "0 B"
+    }
+
     return (
         (size / Math.pow(1024, i)).toFixed(2) * 1 +
         " " +
@@ -87,9 +98,14 @@ export default function FileList(){
       return "application/docx";
     }
 
-    if("application/vnd.oasis.opendocument.text" == typeName){
+    if("application/vnd.oasis.opendocument.text" === typeName){
       return "application/odt";
     }
+
+    if("" === typeName){
+      return "type/folder"
+    }
+
     return typeName;
   }
 
@@ -114,7 +130,6 @@ export default function FileList(){
   }
 
   function onViewClick(file){
-    console.log("clicked")
     setView(!view);
     const storageRef = ref(storage, `team/sample/${file.name}`);
     getDownloadURL(storageRef).then((url) =>{
@@ -125,8 +140,6 @@ export default function FileList(){
     });
 
     setFile(file);
-
-    
   }
 
   function closeView(){
@@ -153,7 +166,6 @@ export default function FileList(){
         <div className='flex'>
           <h1>Name</h1>
         </div>
-
         <div className='flex'>
           <h1>Size</h1>
         </div>
@@ -168,21 +180,37 @@ export default function FileList(){
           {listFile.length === 0 ? (
               <p className='flex'>No files available.</p>
             ) : (
-              listFile.map((file) => (
+              listFile.map((prefix, index) => (
                 <div>
-                  <div key={file.name} className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
-                    <div className='flex'>
-                      <h1>{file.name}</h1>
-                    </div>
-                    <div className='flex'>
-                      <h1>{humanFileSize(file.size)}</h1>
-                    </div>
-                    <div className='flex justify-between'>
-                      <h1>{fileTypeRename(file.type)}</h1>
-                      <div className='cursor-pointer pr-10' onClick={(e) => handleEllipsisClick(e, file)}>
-                        <Ellipsis/>
+                  <div key={index}>
+                    {prefix.isFolder ? (
+                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-gray-200'>
+                        <div className='flex'> 
+                          {prefix.name} 
+                        </div>
+                        <div className='flex'>
+                          -
+                        </div>
+                        <div className='flex'>
+                          folder
+                        </div>
                       </div>
-                    </div>
+                    ):(
+                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
+                        <div className='flex'>
+                          <h1>{prefix.name}</h1>
+                        </div>
+                        <div className='flex'>
+                          <h1>{humanFileSize(prefix.size)}</h1>
+                        </div>
+                        <div className='flex justify-between'>
+                          <h1>{fileTypeRename(prefix.type)}</h1>
+                          <div className='cursor-pointer pr-10' onClick={(e) => handleEllipsisClick(e, prefix)}>
+                            <Ellipsis/>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))
