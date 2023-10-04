@@ -302,9 +302,7 @@ export default function FileList(){
       file && file.type == "application/pdf" ? 
       <div>
         <h1>{file.name}</h1>
-        There seems to be an error rendering a PDF.
-        <DocViewer documents={[url]} pluginRenderers={DocViewerRenderers} />
-        {window.open(url, '_blank')}
+        <embed type="application/pdf" src={url} width={100+'%'} height={700}></embed>
         
 
       </div> 
