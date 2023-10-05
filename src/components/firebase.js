@@ -1,6 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import {getAuth} from "firebase/auth"
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBIEnvAR4FU3S-_U0kbZ_5-Ey8FdbOldvo",
@@ -33,6 +35,7 @@ const deleteData = (collectionName, userId) =>{
   return 	firestore.collection(collectionName).doc(userId).delete() ;
 }
 
+export const auth = getAuth(app);
 export {createUser, readUser, updateUser, deleteData};
 export default storage;
 export { firestore };
