@@ -1,7 +1,26 @@
 import myImage from '../images/logo.png';
+import React, { useState } from 'react';
 import DarkMode from './DarkMode';
+import { auth } from "../../src/components/firebase"
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Link } from 'react-router-dom';
+
+
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const logIn = (e) => {
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      console.log(userCredential);
+    }).catch((error) => {
+      console.log(error);
+    })
+  }
+
   return (
     <>
         
@@ -24,7 +43,7 @@ export default function Login() {
         </div>
 
         <div className="mt-10 sm:mx-auto dark:bg-gray-900 sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={logIn} method="POST">
             <div>
               <label htmlFor="email" className="flex text-sm font-medium leading-6 dark:text-white text-gray-900">
                 Email address
@@ -35,6 +54,9 @@ export default function Login() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  placeholder='Enter your Email'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                 />
@@ -57,21 +79,23 @@ export default function Login() {
                   id="password"
                   name="password"
                   type="password"
+                  value={password}
+                  placeholder='Enter your password'
                   autoComplete="current-password"
                   required
+                  onChange={(e) => setPassword(e.target.value)}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                 />
               </div>
             </div>
 
             <div>
-              <button
-                href="/dashboard"
-                // type="submit"
-                className="flex w-full justify-center rounded-md dark:bg-purple-500 bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                Sign in
-              </button>
+            <Link
+              to="/dashboard"
+              className="flex w-full justify-center rounded-md dark:bg-purple-500 bg-blue-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              Sign in
+            </Link>
               {/* <a href="/dashboard" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
               Sign in.
             </a> */}
@@ -80,9 +104,9 @@ export default function Login() {
 
           <p className="mt-10 text-center text-sm text-gray-500">
             Not a member?{' '}
-            <a href="/register" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
+            <Link to="/register" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
               Register now.
-            </a>
+            </Link>
           </p>
         </div>
         </div>

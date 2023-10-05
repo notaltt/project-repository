@@ -2,6 +2,7 @@ import SideBar from './SideBar';
 import Profile from './Profile-Menu';
 import DarkMode from './DarkMode';
 import React, { useState } from 'react';
+import AuthDetails from './AuthDetails';
 
 const teams = [
     {
@@ -98,6 +99,7 @@ export default function Dashboard(){
   
     return(
         <div className="flex dark:bg-gray-950 bg-white">  
+            <AuthDetails />
            
             <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
             

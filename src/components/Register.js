@@ -4,8 +4,12 @@ import DarkMode from './DarkMode';
 import { useState } from 'react';
 import { firestore as db } from "./firebase";
 import FilterableSelect from "./FilterableSelect";
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, getDocs, where, query } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../src/components/firebase';
+
+
 
 
   export default function Register() {
@@ -18,6 +22,8 @@ import { useNavigate } from 'react-router-dom';
     const [company, setCompany] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const [emailError, setEmailError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
 
     const handleCompanyChange = (selectedCompany) => {
       console.log("handleCompanyChange - Selected company:", selectedCompany);
@@ -62,46 +68,94 @@ import { useNavigate } from 'react-router-dom';
               break;
       }
     };
+
+    const existingUsers = [
+      { email: 'user1@example.com', username: 'user1' },
+      { email: 'user2@example.com', username: 'user2' },
+    ];
   
 
+    const checkUsernameExists = async (username) => {
+      const usersRef = collection(db, 'users'); // Assuming 'users' is the name of your Firestore collection
+      const usernameQuery = query(usersRef, where('username', '==', username));
+      const usernameSnapshot = await getDocs(usernameQuery);
+      return !usernameSnapshot.empty;
+    };
+
+    
     const submitHandler = async (e) => {
       e.preventDefault();
-
-      if(password !== confirmPassword) {
+    
+      if (password !== confirmPassword) {
         alert("Passwords don't match!");
         return;
       }
+    
+      const emailExists = existingUsers.some((user) => user.email === email);
+      const usernameExists = await checkUsernameExists(username);
 
-      const userData = {
+      if (emailExists) {
+        setEmailError("Email already exists.");
+      } else {
+        setEmailError("");
+      }
+    
+      if (usernameExists) {
+        setUsernameError("Username already exists.");
+      } else {
+        setUsernameError("");
+      }
+    
+      if (emailExists || usernameExists) {
+        setIsSubmitting(false);
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+        
+        // Create a new user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    
+        // User registration was successful
+        const user = userCredential.user;
+        console.log("User registered:", user);
+    
+        // Now, you can store additional user data in Firestore if needed
+        const userData = {
           avatar: "null",
           email: email,
           name: name,
-          password: password,
           phone: phone,
           role: "member",
           company: company,
           username: username,
-      };
-
-      addDoc(collection(db, "user"), userData)
-      .then((docRef) => {
-          console.log("Document written with ID: ", docRef.id);
-          setEmail("");
-          setName("");
-          setPassword("");
-          setPhone("");
-          setUsername("");
-          setConfirmPassword("");
-          setCompany("");
-          setIsSubmitting(false);
-          navigate("/login");
-      })
-      .catch((error) => {
-          console.error("Error adding user to Firestore:", error);
-          setIsSubmitting(false);
-      });
-
-    } ;
+        };
+    
+        // Store additional user data in Firestore
+        await addDoc(collection(db, "users"), userData);
+    
+        // Clear form fields and navigate to the login page
+        setEmail("");
+        setName("");
+        setPassword("");
+        setPhone("");
+        setUsername("");
+        setConfirmPassword("");
+        setCompany("");
+        setIsSubmitting(false);
+        navigate("/login");
+      } catch (error) {
+        console.error("Error registering user:", error.message);   
+        if (error.code === "auth/email-already-in-use") {
+          setEmailError("Email already exists.");
+        } else if (error.code === "auth/username-already-in-use") {
+          setUsernameError("Username already exists.");
+        }
+        setIsSubmitting(false);
+      }
+    };
+    
 
 
 
@@ -144,6 +198,7 @@ import { useNavigate } from 'react-router-dom';
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                   />
                 </div>
+                {emailError && <p className="text-red-500">{emailError}</p>}
               </div>
 
             <div >
@@ -184,6 +239,7 @@ import { useNavigate } from 'react-router-dom';
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                 />
               </div>
+              {usernameError && <p className="text-red-500">{usernameError}</p>}
             </div>
 
             <div >
