@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { auth } from "../../src/components/firebase";
 
+
 const AuthDetails = () => {
   const [user, setUser] = useState(null);
 
@@ -24,7 +25,7 @@ const AuthDetails = () => {
     <div>
       {user ? (
         <div>
-          <p>Welcome, {user.email}</p>
+          <p>Welcome, <span>{user.email}</span></p>
           {/* Add additional user details here */}
         </div>
       ) : (

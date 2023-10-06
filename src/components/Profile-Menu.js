@@ -1,9 +1,23 @@
       import React, { useState } from 'react';
       import profile from '../images/profile-picture-5.jpg'
-      
-      
+      import AuthDetails from "./AuthDetails"
+      import { useNavigate } from 'react-router-dom';
+import { UserAuth } from '../context/AuthContext';
       
       export default function Dashboard(){
+
+        const { user, logout } = UserAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+      console.log('You are logged out')
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
           const [open,setOpen] = useState(false)
           return(
             <div className='menu-contianer'>
@@ -11,13 +25,14 @@
                 <img alt='profile' src={profile}></img>
             </div>
             <div className={`dropdown-menu   ${open? 'active' : 'inactive'}`} >
-                <h3>Kent<br></br><span>Web Designer</span></h3>
+                <h3 className='text-xm'><AuthDetails /></h3>
                 <ul>
-                    <DropdownItem text = {"My Profile"}/>
-                    <DropdownItem text = {"Logout"} href ={"/files"}/>
+                    <DropdownItem text = {"My Profile"} href='/files'/>
                   
                 </ul>
+                <button className='hover:text-red-800' onClick={handleLogout}>Logout</button>
             </div>
+            
         </div>
           );
       }

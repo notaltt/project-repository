@@ -5,6 +5,8 @@ import Dashboard from "./components/Dashboard";
 import Files from "./components/Files"
 import Team from "./components/Team"
 import Register from "./components/Register"
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthContextProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
 function App() {
@@ -12,6 +14,7 @@ function App() {
     <Router>
       <div className="App">
           <div>
+            <AuthContextProvider>
             <Routes>
               <Route path="/" element={<Panel/>}>
               </Route>
@@ -26,6 +29,7 @@ function App() {
               <Route path="/register" element={<Register/>}>
               </Route>
             </Routes>
+            </AuthContextProvider>
           </div>
       </div>
     </Router>

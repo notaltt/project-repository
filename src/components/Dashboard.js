@@ -99,8 +99,7 @@ export default function Dashboard(){
   
     return(
         <div className="flex dark:bg-gray-950 bg-white">  
-            <AuthDetails />
-           
+                      
             <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
             
             <div className='flex flex-col flex-1 w-full"'>
