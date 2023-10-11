@@ -12,7 +12,9 @@ export default function Team() {
   const [selectedId, setSelectedId] = useState();
   const [member, setMember] = useState();
   const [users, setUsers] = useState();
-  const [selectedUser, setSelectedUser] = useState(""); 
+  const [selectedUser, setSelectedUser] = useState("");
+  const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
+  const [ErrorModalMessage, setErrorModalMessage] = useState("");
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -38,6 +40,7 @@ export default function Team() {
       setMember(members);
     }
     console.log(id);
+    
   }
 
   const fetchTeam = async () => {
@@ -45,9 +48,12 @@ export default function Team() {
     try {
       const teamRef = collection(db, "team");
       const teamSnapshot = await getDocs(teamRef);
-      teamSnapshot.forEach((doc) => {
-        
-        teams.push({ id: doc.id, ...doc.data() });
+      teamSnapshot.forEach(async (doc) => {
+        const teamData = doc.data();
+        const members = teamData.members || [];
+        const totalMembers = members.length;
+  
+        teams.push({ id: doc.id, ...teamData, totalMembers });
       });
     } catch (error) {
       console.error("Error fetching team:", error);
@@ -55,6 +61,7 @@ export default function Team() {
     setTeam(teams);
     console.log(teams);
   };
+  
 
   const fetchUsers = async () => {
     const users = [];
@@ -82,60 +89,89 @@ export default function Team() {
 
   const handleAddUser = async () => {
     if (selectedUser) {
+      setErrorModalMessage(''); // Clear any previous error message
+  
       try {
-        const teamCollection = collection(db, "team"); 
-        const teamDoc = doc(teamCollection, selectedId); 
-        const newMember = selectedUser; 
-
         
+        const teamCollection = collection(db, 'team');
+        const teamDoc = doc(teamCollection, selectedId);
+        const newMember = selectedUser;
+  
         const docSnapshot = await getDoc(teamDoc);
         const currentMembers = docSnapshot.data().members || [];
-
-        
-        currentMembers.push(newMember);
-
-        
-        await updateDoc(teamDoc, {
-          members: currentMembers,
-        });
-
-        console.log(
-          `Added ${newMember} to the 'members' field of the document.`
-        );
-        
+  
+        if (currentMembers.includes(newMember)) {
+          
+          setErrorModalMessage(`${newMember} is already a member of the team.`);
+          openErrorModal();
+          console.log(`${newMember} is already a member of the team.`);
+        } else {
+          
+          currentMembers.push(newMember);
+  
+          await updateDoc(teamDoc, {
+            members: currentMembers,
+          });
+  
+          console.log(`Added ${newMember} to the 'members' field of the document.`);
+  
+          
+          window.location.reload();
+        }
       } catch (error) {
-        console.error("Error adding member:", error);
+        console.error('Error adding member:', error);
+        setErrorModalMessage('An error occurred while adding the user.'); 
+        openErrorModal();
       }
     }
   };
+  
+
+  
   const handleRemoveUser = async () => {
     if (selectedUser) {
+      setErrorModalMessage(''); // Clear any previous error message
+  
       try {
-        const teamCollection = collection(db, "team"); 
-        const teamDoc = doc(teamCollection, selectedId); 
-
-       
+        const teamCollection = collection(db, 'team');
+        const teamDoc = doc(teamCollection, selectedId);
+  
         const docSnapshot = await getDoc(teamDoc);
         const currentMembers = docSnapshot.data().members || [];
+  
+        if (!currentMembers.includes(selectedUser)) {
 
-        
-        const updatedMembers = currentMembers.filter(
-          (member) => member !== selectedUser
-        );
-
-        
-        await updateDoc(teamDoc, {
-          members: updatedMembers,
-        });
-
-        console.log(
-          `Removed ${selectedUser} from the 'members' field of the document.`
-        );
-        
+          setErrorModalMessage(`${selectedUser} is not a member of the team.`);
+          openErrorModal();
+          console.log(`${selectedUser} is not a member of the team.`);
+        } else {
+          
+          const updatedMembers = currentMembers.filter((member) => member !== selectedUser);
+  
+          await updateDoc(teamDoc, {
+            members: updatedMembers,
+          });
+  
+          console.log(`Removed ${selectedUser} from the 'members' field of the document.`);
+  
+          
+          window.location.reload();
+        }
       } catch (error) {
-        console.error("Error removing member:", error);
+        console.error('Error removing member:', error);
+        setErrorModalMessage('An error occurred while removing the user.'); 
+        openErrorModal();
       }
     }
+  };
+  
+
+  const openErrorModal = () => {
+    setisErrorModalOpen(true);
+  };
+
+  const closeErrorModal = () => {
+    setisErrorModalOpen(false);
   };
 
   return (
@@ -204,7 +240,7 @@ export default function Team() {
                     <h2 className='text-3xl font-bold dark:text-white text-gray-700 opacity-100'>
                       Teams You're In
                     </h2>
-                    <div className='mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0'>
+                    <div className='cursor-pointer mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0'>
                       {team?.map((team) => (
                         <div
                           className='group relative'
@@ -227,6 +263,11 @@ export default function Team() {
                               <span className='absolute inset-0' />
                               {team.description}
                             </a>
+                            <br></br><a href>
+                              <span className='absolute inset-0' />
+                              Total Members: {team.totalMembers}
+                            </a>
+                            
                           </h3>
                         </div>
                       ))}
@@ -241,10 +282,9 @@ export default function Team() {
                 <h1>{team.TeamName}</h1>;
               })}
               <div>
-                <h1>
-                  <hr />
-                  List of members
-                </h1>
+                
+                  <h3>List of members</h3>
+              
                 <div
                   id='file-header'
                   className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'
@@ -254,14 +294,12 @@ export default function Team() {
                   </div>
                   <div className='flex'></div>
                 </div>
-                <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
+                <div className='h-full w-full grid  pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
                   {member?.map((item, index) => (
                     <div className='flex'>{item}</div>
                   ))}
 
-                  <div className='flex'>
-                    {/* <button>Remove User</button> */}
-                  </div>
+                  
                 </div>
                 <button onClick={() => closeTeam()}>Go back</button>
               </div>
@@ -276,10 +314,23 @@ export default function Team() {
                     </option>
                   ))}
                 </select>
-                <button onClick={handleAddUser}>Add User</button>
-                <button onClick={handleRemoveUser}>Remove User</button>
+                <br/><button onClick={handleAddUser}>Add User</button>
+                <br/><button onClick={handleRemoveUser}>Remove User</button>
               </div>
+
+              {isErrorModalOpen && (
+                <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
+                  <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
+                    <h2 className="text-2xl font-semibold mb-4">Error!</h2>
+                    <p id="error-message">{ErrorModalMessage}</p>
+                    <button onClick={closeErrorModal} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
+                  </div>
+                </div>
+              )}
+              
             </>
+
+            
           )}
         </main>
       </div>
