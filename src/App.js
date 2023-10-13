@@ -7,31 +7,31 @@ import Team from "./components/Team"
 import Register from "./components/Register"
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthContextProvider } from './context/AuthContext';
-import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
-const App = () =>{
+function App() {
   return (
     <Router>
-        <AuthContextProvider>
-            <Routes>
-            <Route path="/login" element={<Login/>}>
-              </Route>
-              <Route path="/" element={<Panel/>}>
-              </Route>
-            </Routes>
-
-
-            {/* USE PROTECTEDROUTE IF MAG ADD UG OTHER PAGES NGA NEED UG USER LOGIN PARA DILI MA ACCESS INIG URL REDIRECT */}
-            <ProtectedRoute path="/dashboard" element={<Dashboard/>}>
-              </ProtectedRoute>
-              <ProtectedRoute path="/files" element={<Files/>}>
-              </ProtectedRoute>
-              <ProtectedRoute path="/team" element={<Team/>}>
-              </ProtectedRoute>
-              <ProtectedRoute path="/register" element={<Register/>}>
-              </ProtectedRoute>
-        </AuthContextProvider>
-          
+      <div className="App">
+          <div>
+            <AuthContextProvider>
+              <Routes>
+                <Route path="/" element={<Panel/>}>
+                </Route>
+                <Route path="/register" element={<Register/>}>
+                </Route>
+                <Route path="/login" element={<Login/>}>
+                </Route>
+                <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}>
+                </Route>
+                <Route path="/files" element={<ProtectedRoute><Files/></ProtectedRoute>}>
+                </Route>
+                <Route path="/team" element={<ProtectedRoute><Team/></ProtectedRoute>}>
+                </Route>
+              </Routes>
+            </AuthContextProvider>
+          </div>
+      </div>
     </Router>
   );
 }
