@@ -90,9 +90,26 @@ export default function FileList(){
       .then((url) => {
         const xhr = new XMLHttpRequest();
         xhr.responseType = 'blob';
-        xhr.onload = (event) => {
-          const blob = xhr.response;
+  
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const blob = xhr.response;
+  
+            const objectURL = URL.createObjectURL(blob);
+  
+            const a = document.createElement('a');
+            a.href = objectURL;
+            a.download = fileName;
+            a.style.display = 'none';
+  
+            document.body.appendChild(a);
+            a.click();
+  
+            document.body.removeChild(a);
+            URL.revokeObjectURL(objectURL);
+          }
         };
+  
         xhr.open('GET', url);
         xhr.send();
       })
@@ -100,6 +117,7 @@ export default function FileList(){
         console.error('Error getting the URL:', error);
       });
   }
+  
   
   
 
