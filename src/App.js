@@ -19,6 +19,9 @@ const App = () =>{
               <Route path="/" element={<Panel/>}>
               </Route>
             </Routes>
+
+
+            {/* USE PROTECTEDROUTE IF MAG ADD UG OTHER PAGES NGA NEED UG USER LOGIN PARA DILI MA ACCESS INIG URL REDIRECT */}
             <ProtectedRoute path="/dashboard" element={<Dashboard/>}>
               </ProtectedRoute>
               <ProtectedRoute path="/files" element={<Files/>}>
