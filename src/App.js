@@ -9,29 +9,26 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthContextProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
-function App() {
+const App = () =>{
   return (
     <Router>
-      <div className="App">
-          <div>
-            <AuthContextProvider>
+        <AuthContextProvider>
             <Routes>
+            <Route path="/login" element={<Login/>}>
+              </Route>
               <Route path="/" element={<Panel/>}>
               </Route>
-              <Route path="/login" element={<Login/>}>
-              </Route>
-              <Route path="/dashboard" element={<Dashboard/>}>
-              </Route>
-              <Route path="/files" element={<Files/>}>
-              </Route>
-              <Route path="/team" element={<Team/>}>
-              </Route>
-              <Route path="/register" element={<Register/>}>
-              </Route>
             </Routes>
-            </AuthContextProvider>
-          </div>
-      </div>
+            <ProtectedRoute path="/dashboard" element={<Dashboard/>}>
+              </ProtectedRoute>
+              <ProtectedRoute path="/files" element={<Files/>}>
+              </ProtectedRoute>
+              <ProtectedRoute path="/team" element={<Team/>}>
+              </ProtectedRoute>
+              <ProtectedRoute path="/register" element={<Register/>}>
+              </ProtectedRoute>
+        </AuthContextProvider>
+          
     </Router>
   );
 }
