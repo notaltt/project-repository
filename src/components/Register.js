@@ -4,7 +4,7 @@ import DarkMode from './DarkMode';
 import { useState } from 'react';
 import { firestore as db } from "./firebase";
 import FilterableSelect from "./FilterableSelect";
-import { addDoc, collection, getDocs, where, query } from 'firebase/firestore';
+import { doc, addDoc, collection, getDocs, where, query } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../src/components/firebase';
@@ -119,7 +119,7 @@ import { Link } from 'react-router-dom';
         alert("Password must be at least 8 characters long, contain an uppercase and lowercase letter, a number, and a special character.");
         return;
       }
-    
+
       const emailExists = await checkEmailExists(email);
       const usernameExists = await checkUsernameExists(username);
 
@@ -152,6 +152,7 @@ import { Link } from 'react-router-dom';
     
         // Now, you can store additional user data in Firestore if needed
         const userData = {
+          uid: user.uid,
           avatar: "null",
           email: email,
           name: name,
@@ -160,9 +161,11 @@ import { Link } from 'react-router-dom';
           company: company,
           username: username,
         };
+        
     
         // Store additional user data in Firestore
-        await addDoc(collection(db, "users"), userData);
+        await addDoc(doc(db, "users", user.uid), userData);
+
     
         // Clear form fields and navigate to the login page
         setEmail("");
