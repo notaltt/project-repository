@@ -257,7 +257,7 @@ export default function Team() {
                           </div>
                           <h3 className='p-3 text-sm dark:text-gray-400 text-gray-500'>
                             <p className='text-base font-semibold dark:text-white text-gray-900'>
-                              {team.TeamName}
+                              {team.teamName}
                             </p>
                             <a href={team.href}>
                               <span className='absolute inset-0' />
