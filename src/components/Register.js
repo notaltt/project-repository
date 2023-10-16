@@ -8,6 +8,7 @@ import { addDoc, collection, getDocs, where, query } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../src/components/firebase';
+import { Link } from 'react-router-dom';
 
 
 
@@ -15,20 +16,23 @@ import { auth } from '../../src/components/firebase';
   export default function Register() {
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
-    const [password, setPassword] = useState("");
     const [phone, setPhone] = useState("");
     const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [isPasswordMatch, setIsPasswordMatch] = useState(true);
     const [company, setCompany] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
     const [emailError, setEmailError] = useState('');
     const [usernameError, setUsernameError] = useState('');
 
+
     const handleCompanyChange = (selectedCompany) => {
       console.log("handleCompanyChange - Selected company:", selectedCompany);
       setCompany(selectedCompany);
     };
+    
     
 
    
@@ -41,6 +45,19 @@ import { auth } from '../../src/components/firebase';
       "Microsoft",
       "Apple",
     ];
+
+    const handleConfirmPasswordChange = (e) => {
+      const confirmPassValue = e.target.value;
+      setConfirmPassword(confirmPassValue);
+      
+      if (password !== confirmPassValue) {
+        setIsPasswordMatch(false);
+      } else {
+        setIsPasswordMatch(true);
+      }
+    };
+    
+    
     
     const inputHandler = (e) => {
       const { name, value } = e.target;
@@ -68,12 +85,24 @@ import { auth } from '../../src/components/firebase';
               break;
       }
     };
+    
+    const validatePassword = (password) => {
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasDigits = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(password);
+      
+      return password.length >= 8 && hasUpperCase && hasLowerCase && hasDigits && hasSpecialChar;
+    };
 
-    const existingUsers = [
-      { email: 'user1@example.com', username: 'user1' },
-      { email: 'user2@example.com', username: 'user2' },
-    ];
-  
+    
+    const checkEmailExists = async (email) => {
+      const usersRef = collection(db, 'users'); 
+      const emailQuery = query(usersRef, where('email', '==', email));
+      const emailSnapshot = await getDocs(emailQuery);
+      return !emailSnapshot.empty;
+    };
+    
 
     const checkUsernameExists = async (username) => {
       const usersRef = collection(db, 'users'); // Assuming 'users' is the name of your Firestore collection
@@ -85,13 +114,13 @@ import { auth } from '../../src/components/firebase';
     
     const submitHandler = async (e) => {
       e.preventDefault();
-    
-      if (password !== confirmPassword) {
-        alert("Passwords don't match!");
+      
+      if (!validatePassword(password)) {
+        alert("Password must be at least 8 characters long, contain an uppercase and lowercase letter, a number, and a special character.");
         return;
       }
     
-      const emailExists = existingUsers.some((user) => user.email === email);
+      const emailExists = await checkEmailExists(email);
       const usernameExists = await checkUsernameExists(username);
 
       if (emailExists) {
@@ -308,10 +337,11 @@ import { auth } from '../../src/components/firebase';
                         name="confirmPassword"
                         type="password"
                         value={confirmPassword}
-                        onChange={inputHandler}
+                        onChange={handleConfirmPasswordChange}
                         required
                         className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                     />
+                    {!isPasswordMatch && <p style={{ color: "red" }}>Passwords do not match!</p>}
                 </div>
               </div>
 
@@ -326,9 +356,9 @@ import { auth } from '../../src/components/firebase';
               >
                 Register
               </button>
-              <a href="/login" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
-              back to login page
-            </a>
+              <Link to="/login" className="font-semibold leading-6 dark:text-purple-400 text-blue-600 hover:text-blue-500">
+                back to login page
+              </Link>
             </div>
           </form>
 
