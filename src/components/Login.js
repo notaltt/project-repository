@@ -4,6 +4,7 @@ import DarkMode from './DarkMode';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
 
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +20,7 @@ const Login = () => {
   const closeErrorModal = () => {
     setIsErrorModalOpen(false);
   };
+  
 
 
   const handleSubmit = async (e) => {
@@ -88,7 +90,7 @@ const Login = () => {
            Password
          </label>
          <div className="text-sm">
-           <a href="/" className="font-semibold text-blue-600 dark:hover:text-purple-400 dark:text-purple-500 hover:text-blue-500">
+           <a href="/forgot-password" className="font-semibold text-blue-600 dark:hover:text-purple-400 dark:text-purple-500 hover:text-blue-500">
              Forgot password?
            </a>
          </div>
