@@ -6,6 +6,7 @@ import Files from "./components/Files"
 import Team from "./components/Team"
 import Register from "./components/Register"
 import ProtectedRoute from './components/ProtectedRoute';
+import ForgotPassword from './components/Forgot_password';
 import { AuthContextProvider } from './context/AuthContext';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 
@@ -21,6 +22,8 @@ function App() {
                 <Route path="/register" element={<Register/>}>
                 </Route>
                 <Route path="/login" element={<Login/>}>
+                </Route>
+                <Route path='/forgot-password' element={<ForgotPassword/>}> 
                 </Route>
                 <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}>
                 </Route>

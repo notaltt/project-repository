@@ -257,16 +257,12 @@ export default function Team() {
                           </div>
                           <h3 className='p-3 text-sm dark:text-gray-400 text-gray-500'>
                             <p className='text-base font-semibold dark:text-white text-gray-900'>
-                              {team.TeamName}
+                              {team.teamName}
                             </p>
-                            <a href={team.href}>
-                              <span className='absolute inset-0' />
-                              {team.description}
-                            </a>
-                            <br></br><a href>
+                            
                               <span className='absolute inset-0' />
                               Total Members: {team.totalMembers}
-                            </a>
+                            
                             
                           </h3>
                         </div>
@@ -279,12 +275,13 @@ export default function Team() {
           ) : (
             <>
               {team.map((team) => {
-                <h1>{team.TeamName}</h1>;
+                <h1>{team.teamName}</h1>;
               })}
-              <div>
-                
-                  <h3>List of members</h3>
               
+              {member && member.length > 0? (
+                <>
+                <div>
+                  <h1>List of members</h1>
                 <div
                   id='file-header'
                   className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'
@@ -292,7 +289,6 @@ export default function Team() {
                   <div className='flex'>
                     <h1>Member Name</h1>
                   </div>
-                  <div className='flex'></div>
                 </div>
                 <div className='h-full w-full grid  pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
                   {member?.map((item, index) => (
@@ -303,6 +299,15 @@ export default function Team() {
                 </div>
                 <button onClick={() => closeTeam()}>Go back</button>
               </div>
+                </>
+
+              )
+              :
+              (<>
+              <p>No members in this team.</p>
+              <button onClick={() => closeTeam()}>Go back</button><br></br>
+              </>
+              )}
               <label for='users'>Choose users:</label>
 
               <div>
