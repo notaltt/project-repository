@@ -4,7 +4,7 @@ import DarkMode from './DarkMode';
 import { useState } from 'react';
 import { firestore as db } from "./firebase";
 import FilterableSelect from "./FilterableSelect";
-import { doc, addDoc, collection, getDocs, where, query } from 'firebase/firestore';
+import { doc, addDoc, collection, getDocs, where, query, setDoc } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../src/components/firebase';
@@ -163,8 +163,16 @@ import { Link } from 'react-router-dom';
         };
         
     
-        // Store additional user data in Firestore
-        await addDoc(doc(db, "users", user.uid), userData);
+        // // Store additional user data in Firestore
+        // await addDoc(doc(db, "users", user.uid), userData);
+
+        // console.log(user.uid);
+
+        const addUser = doc(db, 'users', user.uid);
+
+        await setDoc(addUser, userData);
+
+        console.log("FirestoreCreated")
 
     
         // Clear form fields and navigate to the login page
