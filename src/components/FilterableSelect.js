@@ -1,8 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { firestore as db } from "./firebase"; 
+import { collection, getDocs } from 'firebase/firestore';
 
-
-function FilterableSelect({ options, onTeamChange, selectedTeam }) {
+function FilterableSelect({ onTeamChange, selectedTeam }) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const optionsCollection = collection(db, 'company'); 
+        const querySnapshot = await getDocs(optionsCollection);
+        const optionData = [];
+        optionData.push("Select Company:")
+        querySnapshot.forEach((doc) => {
+          optionData.push(doc.data().companyName);
+        });
+
+        setOptions(optionData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching options from Firestore:", error);
+      }
+    };
+
+    fetchOptions();
+  }, []);
+
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -11,7 +36,9 @@ function FilterableSelect({ options, onTeamChange, selectedTeam }) {
     setSearchTerm(e.target.value);
   };
 
-
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="relative">
@@ -22,12 +49,13 @@ function FilterableSelect({ options, onTeamChange, selectedTeam }) {
         value={searchTerm}
         onChange={handleInputChange}
       />
-      <select className="block w-full px-4 py-2 border rounded-lg mt-1"
-      value={selectedTeam}
-      onChange={e => {
-        console.log("Dropdown value changed:", e.target.value);
-        onTeamChange(e.target.value);
-    }}
+      <select
+        className="block w-full px-4 py-2 border rounded-lg mt-1"
+        value={selectedTeam}
+        onChange={(e) => {
+          console.log("Dropdown value changed:", e.target.value);
+          onTeamChange(e.target.value);
+        }}
       >
         {filteredOptions.map((option, index) => (
           <option key={index} value={option}>
