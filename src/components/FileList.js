@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata, uploadString} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
-import { type } from '@testing-library/user-event/dist/type';
-import DocViewer, {DocViewerRenderers} from "@cyntler/react-doc-viewer";
+
 
 
 export default function FileList(){
@@ -70,7 +69,7 @@ export default function FileList(){
   }
 
   function humanFileSize(size){
-    const i = size==0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+    const i = size===0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
 
     if("NaN undefined" === size){
       return "0 B"

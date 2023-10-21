@@ -4,9 +4,12 @@ import DarkMode from "./DarkMode";
 import React, { useEffect, useState } from "react";
 import { firestore as db } from "./firebase";
 import { addDoc, collection, getDocs, where, query, doc, updateDoc, getDoc, } from "firebase/firestore";
+import dayjs from 'dayjs';
+import { generateDate } from "./calendar";
 
 export default function Tasks() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  console.log(generateDate());
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -16,7 +19,6 @@ export default function Tasks() {
     <div className="flex bg-white dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }">  
            
     <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
-
      
 
     </div>
