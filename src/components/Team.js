@@ -3,7 +3,8 @@ import Profile from "./Profile-Menu";
 import DarkMode from "./DarkMode";
 import React, { useEffect, useState } from "react";
 import { firestore as db } from "./firebase";
-import { addDoc, collection, getDocs, where, query, doc, updateDoc, getDoc, } from "firebase/firestore";
+import { addDoc, collection, getDocs, where, query, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
+import { auth } from '../../src/components/firebase';
 
 export default function Team() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -15,6 +16,9 @@ export default function Team() {
   const [selectedUser, setSelectedUser] = useState("");
   const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
+  const [hasFetched, setHasFetched] = useState(false);
+  const currentUser = auth.currentUser;
+
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -43,6 +47,7 @@ export default function Team() {
     
   }
 
+  // every user can see all teams
   const fetchTeam = async () => {
     const teams = [];
     try {
@@ -59,9 +64,44 @@ export default function Team() {
       console.error("Error fetching team:", error);
     }
     setTeam(teams);
-    console.log(teams);
+    console.log("AVALAIBLE" + teams + "UNTIL HERE");
   };
-  
+
+
+  // //user integrated
+  // const fetchTeam = async (user) => {
+  //   const teams = [];
+  //   try {
+  //     console.log("user" + user + "ends");
+
+  //     const userRef = doc(db, 'users', user.uid);
+  //     const userSnapshot = await getDoc(userRef);
+
+  //     if (userSnapshot.exists()) {
+  //       console.log("exists");
+  //       const userData = userSnapshot.data();
+  //       const userTeams = userData.teams || [];
+
+  //       console.log("userTeams", userTeams);
+
+  //       const teamRef = collection(db, 'team');
+  //       const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+  //       const teamSnapshot = await getDocs(teamQuery);
+
+  //       teamSnapshot.forEach((doc) => {
+  //         const teamData = doc.data();
+  //         const members = teamData.members || [];
+  //         const totalMembers = members.length;
+
+  //         teams.push({ id: doc.id, ...teamData, totalMembers });
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching team:", error);
+  //   }
+  //   setTeam(teams);
+  //   console.log("AVAILABLE", teams);
+  // };
 
   const fetchUsers = async () => {
     const users = [];
@@ -79,9 +119,15 @@ export default function Team() {
   };
 
   useEffect(() => {
-    fetchTeam();
+    if (currentUser && !hasFetched) {
+      fetchTeam(currentUser);
+      setHasFetched(true); 
+    } else if (!currentUser) {
+      console.log("User is not authenticated.");
+    }
+
     fetchUsers();
-  }, []);
+  }, [currentUser, hasFetched]);
 
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value); 
@@ -90,7 +136,7 @@ export default function Team() {
   const handleAddUser = async () => {
     if (selectedUser) {
       setErrorModalMessage(''); // Clear any previous error message
-  
+      console.log(selectedUser);
       try {
         
         const teamCollection = collection(db, 'team');
@@ -99,6 +145,10 @@ export default function Team() {
   
         const docSnapshot = await getDoc(teamDoc);
         const currentMembers = docSnapshot.data().members || [];
+
+        const userCollection = collection(db, 'users');
+        const userQuery = query(userCollection, where('name', '==', selectedUser));
+        const userSnapshot = await getDocs(userQuery);
   
         if (currentMembers.includes(newMember)) {
           
@@ -112,11 +162,21 @@ export default function Team() {
           await updateDoc(teamDoc, {
             members: currentMembers,
           });
+
+          if(userSnapshot.size === 1){
+            const userDoc = doc(userCollection, userSnapshot.docs[0].id);
+            const userTeam = userSnapshot.docs[0].data().teams || [];
+            userTeam.push(selectedId);
+            await updateDoc(userDoc, { teams: userTeam });
+            console.log("Teams added in the user's field.")
+          }else{
+            console.log("asdasd");
+          }
   
           console.log(`Added ${newMember} to the 'members' field of the document.`);
   
           
-          window.location.reload();
+          //window.location.reload();
         }
       } catch (error) {
         console.error('Error adding member:', error);
@@ -131,7 +191,6 @@ export default function Team() {
   const handleRemoveUser = async () => {
     if (selectedUser) {
       setErrorModalMessage(''); // Clear any previous error message
-  
       try {
         const teamCollection = collection(db, 'team');
         const teamDoc = doc(teamCollection, selectedId);
@@ -155,7 +214,7 @@ export default function Team() {
           console.log(`Removed ${selectedUser} from the 'members' field of the document.`);
   
           
-          window.location.reload();
+          //window.location.reload();
         }
       } catch (error) {
         console.error('Error removing member:', error);
@@ -262,8 +321,7 @@ export default function Team() {
                             
                               <span className='absolute inset-0' />
                               Total Members: {team.totalMembers}
-                            
-                            
+          
                           </h3>
                         </div>
                       ))}
