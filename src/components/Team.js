@@ -170,13 +170,13 @@ export default function Team() {
             await updateDoc(userDoc, { teams: userTeam });
             console.log("Teams added in the user's field.")
           }else{
-            console.log("asdasd");
+            // console.log("asdasd");
           }
   
           console.log(`Added ${newMember} to the 'members' field of the document.`);
   
           
-          //window.location.reload();
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error adding member:', error);
@@ -214,7 +214,7 @@ export default function Team() {
           console.log(`Removed ${selectedUser} from the 'members' field of the document.`);
   
           
-          //window.location.reload();
+          window.location.reload();
         }
       } catch (error) {
         console.error('Error removing member:', error);
