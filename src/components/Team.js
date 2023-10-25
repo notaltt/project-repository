@@ -185,8 +185,6 @@ export default function Team() {
   
     setErrorModalMessage(""); // Clear any previous error message
     try {
-      // Rest of your code for adding a user
-  
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const newMember = selectedUser;
@@ -200,12 +198,19 @@ export default function Team() {
         return; // Exit the function to prevent further execution
       }
   
-      // Rest of your code for adding a user
+      // Add the selectedUser to the current members
+      currentMembers.push(newMember);
+  
+      // Update the members in the team document
+      await updateDoc(teamDoc, {
+        members: currentMembers,
+      });
     } catch (error) {
       console.error("Error adding member:", error);
       setErrorModalMessage("An error occurred while adding the user.");
       openErrorModal();
     }
+    window.location.reload();
   };
   
 
@@ -218,26 +223,32 @@ export default function Team() {
   
     setErrorModalMessage(""); // Clear any previous error message
     try {
-      // Rest of your code for removing a user
-  
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
+      const userToRemove = selectedUser;
   
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
   
       // Check if the selectedUser is not a member
-      if (!currentMembers.includes(selectedUser)) {
-        alert(`${selectedUser} is not a member of the team.`);
+      if (!currentMembers.includes(userToRemove)) {
+        alert(`${userToRemove} is not a member of the team.`);
         return; // Exit the function to prevent further execution
       }
   
-      // Rest of your code for removing a user
+      // Remove the selectedUser from the current members
+      const updatedMembers = currentMembers.filter(member => member !== userToRemove);
+  
+      // Update the members in the team document
+      await updateDoc(teamDoc, {
+        members: updatedMembers,
+      });
     } catch (error) {
       console.error("Error removing member:", error);
       setErrorModalMessage("An error occurred while removing the user.");
       openErrorModal();
     }
+    window.location.reload();
   };
   
 
