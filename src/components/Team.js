@@ -179,11 +179,11 @@ export default function Team() {
 
   const handleAddUser = async () => {
     if (!selectedUser) {
-      alert("Please select a user before adding.");
+      setErrorModalMessage('Please select a user before adding.');
+      openErrorModal();
       return; // Exit the function to prevent further execution
     }
   
-    setErrorModalMessage(""); // Clear any previous error message
     try {
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
@@ -194,7 +194,8 @@ export default function Team() {
   
       // Check if the selectedUser is already a member
       if (currentMembers.includes(newMember)) {
-        alert(`${newMember} is already a member of the team.`);
+        setErrorModalMessage(`${newMember} is already a member of the team.`);
+        openErrorModal();
         return; // Exit the function to prevent further execution
       }
   
@@ -206,8 +207,8 @@ export default function Team() {
         members: currentMembers,
       });
     } catch (error) {
-      console.error("Error adding member:", error);
-      setErrorModalMessage("An error occurred while adding the user.");
+      console.error('Error adding member:', error);
+      setErrorModalMessage('An error occurred while adding the user.');
       openErrorModal();
     }
     window.location.reload();
@@ -217,11 +218,11 @@ export default function Team() {
   
   const handleRemoveUser = async () => {
     if (!selectedUser) {
-      alert("Please select a user before removing.");
+      setErrorModalMessage('Please select a user before removing.');
+      openErrorModal();
       return; // Exit the function to prevent further execution
     }
   
-    setErrorModalMessage(""); // Clear any previous error message
     try {
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
@@ -232,20 +233,21 @@ export default function Team() {
   
       // Check if the selectedUser is not a member
       if (!currentMembers.includes(userToRemove)) {
-        alert(`${userToRemove} is not a member of the team.`);
+        setErrorModalMessage(`${userToRemove} is not a member of the team.`);
+        openErrorModal();
         return; // Exit the function to prevent further execution
       }
   
       // Remove the selectedUser from the current members
-      const updatedMembers = currentMembers.filter(member => member !== userToRemove);
+      const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
   
       // Update the members in the team document
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
     } catch (error) {
-      console.error("Error removing member:", error);
-      setErrorModalMessage("An error occurred while removing the user.");
+      console.error('Error removing member:', error);
+      setErrorModalMessage('An error occurred while removing the user.');
       openErrorModal();
     }
     window.location.reload();
