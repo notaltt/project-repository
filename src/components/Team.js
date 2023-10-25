@@ -178,93 +178,65 @@ export default function Team() {
   };
 
   const handleAddUser = async () => {
-    if (selectedUser) {
-      setErrorModalMessage(''); // Clear any previous error message
-      //console.log(selectedUser);
-      try {
-        
-        const teamCollection = collection(db, 'team');
-        const teamDoc = doc(teamCollection, selectedId);
-        const newMember = selectedUser;
+    if (!selectedUser) {
+      alert("Please select a user before adding.");
+      return; // Exit the function to prevent further execution
+    }
   
-        const docSnapshot = await getDoc(teamDoc);
-        const currentMembers = docSnapshot.data().members || [];
-
-        const userCollection = collection(db, 'users');
-        const userQuery = query(userCollection, where('name', '==', selectedUser));
-        const userSnapshot = await getDocs(userQuery);
+    setErrorModalMessage(""); // Clear any previous error message
+    try {
+      // Rest of your code for adding a user
   
-        if (currentMembers.includes(newMember)) {
-          
-          setErrorModalMessage(`${newMember} is already a member of the team.`);
-          openErrorModal();
-          console.log(`${newMember} is already a member of the team.`);
-        } else {
-          
-          currentMembers.push(newMember);
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
+      const newMember = selectedUser;
   
-          await updateDoc(teamDoc, {
-            members: currentMembers,
-          });
-
-          if(userSnapshot.size === 1){
-            const userDoc = doc(userCollection, userSnapshot.docs[0].id);
-            const userTeam = userSnapshot.docs[0].data().teams || [];
-            userTeam.push(selectedId);
-            await updateDoc(userDoc, { teams: userTeam });
-            console.log("Teams added in the user's field.")
-          }else{
-            // console.log("asdasd");
-          }
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
   
-          console.log(`Added ${newMember} to the 'members' field of the document.`);
-  
-          
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error adding member:', error);
-        setErrorModalMessage('An error occurred while adding the user.'); 
-        openErrorModal();
+      // Check if the selectedUser is already a member
+      if (currentMembers.includes(newMember)) {
+        alert(`${newMember} is already a member of the team.`);
+        return; // Exit the function to prevent further execution
       }
+  
+      // Rest of your code for adding a user
+    } catch (error) {
+      console.error("Error adding member:", error);
+      setErrorModalMessage("An error occurred while adding the user.");
+      openErrorModal();
     }
   };
   
 
   
   const handleRemoveUser = async () => {
-    if (selectedUser) {
-      setErrorModalMessage(''); // Clear any previous error message
-      try {
-        const teamCollection = collection(db, 'team');
-        const teamDoc = doc(teamCollection, selectedId);
+    if (!selectedUser) {
+      alert("Please select a user before removing.");
+      return; // Exit the function to prevent further execution
+    }
   
-        const docSnapshot = await getDoc(teamDoc);
-        const currentMembers = docSnapshot.data().members || [];
+    setErrorModalMessage(""); // Clear any previous error message
+    try {
+      // Rest of your code for removing a user
   
-        if (!currentMembers.includes(selectedUser)) {
-
-          setErrorModalMessage(`${selectedUser} is not a member of the team.`);
-          openErrorModal();
-          console.log(`${selectedUser} is not a member of the team.`);
-        } else {
-          
-          const updatedMembers = currentMembers.filter((member) => member !== selectedUser);
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
   
-          await updateDoc(teamDoc, {
-            members: updatedMembers,
-          });
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
   
-          console.log(`Removed ${selectedUser} from the 'members' field of the document.`);
-  
-          
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error removing member:', error);
-        setErrorModalMessage('An error occurred while removing the user.'); 
-        openErrorModal();
+      // Check if the selectedUser is not a member
+      if (!currentMembers.includes(selectedUser)) {
+        alert(`${selectedUser} is not a member of the team.`);
+        return; // Exit the function to prevent further execution
       }
+  
+      // Rest of your code for removing a user
+    } catch (error) {
+      console.error("Error removing member:", error);
+      setErrorModalMessage("An error occurred while removing the user.");
+      openErrorModal();
     }
   };
   
