@@ -53,6 +53,7 @@ export default function Team() {
       setErrorModalMessage('An error occurred while renaming the team.');
       openErrorModal();
     }
+    window.location.reload();
   };
 
   const handleRenameTeam = () => {
@@ -62,6 +63,7 @@ export default function Team() {
       setErrorModalMessage('Please enter a new team name.');
       openErrorModal();
     }
+    
   };
 
 
