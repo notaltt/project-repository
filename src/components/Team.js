@@ -17,12 +17,53 @@ export default function Team() {
   const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
+  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
   const currentUser = auth.currentUser;
+  const [newTeamName, setNewTeamName] = useState('');
+  
 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  function openRenameTeam(){
+    setRenameTeamOpen(!renameTeamOpen);
+  }
+
+  function closeRenameTeam(){
+    setRenameTeamOpen(!renameTeamOpen);
+  }
+
+  const renameTeam = async () => {
+    try {
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
+  
+      await updateDoc(teamDoc, {
+        teamName: newTeamName,
+      });
+
+      console.log(`Team name updated to ${newTeamName}`);
+      
+      // Close the rename team modal or update the team name in the state.
+      setRenameTeamOpen(false);
+      // You may want to update the team name in your local state here.
+    } catch (error) {
+      console.error('Error renaming team:', error);
+      setErrorModalMessage('An error occurred while renaming the team.');
+      openErrorModal();
+    }
+  };
+
+  const handleRenameTeam = () => {
+    if (newTeamName) {
+      renameTeam();
+    } else {
+      setErrorModalMessage('Please enter a new team name.');
+      openErrorModal();
+    }
+  };
+
 
   function closeTeam() {
     setshowTeam(!showTeam);
@@ -136,7 +177,7 @@ export default function Team() {
   const handleAddUser = async () => {
     if (selectedUser) {
       setErrorModalMessage(''); // Clear any previous error message
-      console.log(selectedUser);
+      //console.log(selectedUser);
       try {
         
         const teamCollection = collection(db, 'team');
@@ -379,6 +420,7 @@ export default function Team() {
                 </select>
                 <br/><button onClick={handleAddUser}>Add User</button>
                 <br/><button onClick={handleRemoveUser}>Remove User</button>
+                <br/><button onClick={openRenameTeam}>Rename Team</button>
               </div>
 
               {isErrorModalOpen && (
@@ -387,6 +429,21 @@ export default function Team() {
                     <h2 className="text-2xl font-semibold mb-4">Error!</h2>
                     <p id="error-message">{ErrorModalMessage}</p>
                     <button onClick={closeErrorModal} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
+                  </div>
+                </div>
+              )}
+              {renameTeamOpen && (
+                <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
+                  <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
+                    <h2 className="text-2xl font-semibold mb-4">Input team name: </h2>
+                    <p id="error-message"><input
+                    type="text"
+                    placeholder="Enter new team name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    /></p>
+                    <button onClick={handleRenameTeam}className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Submit</button>
+                    <button onClick={closeRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
                   </div>
                 </div>
               )}
