@@ -20,6 +20,7 @@ export default function Team() {
   const [renameTeamOpen, setRenameTeamOpen] = useState(false);
   const currentUser = auth.currentUser;
   const [newTeamName, setNewTeamName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   
 
 
@@ -60,11 +61,11 @@ export default function Team() {
     if (newTeamName) {
       renameTeam();
     } else {
-      setErrorModalMessage('Please enter a new team name.');
-      openErrorModal();
+      // Show an alert with an error message
+      alert('Please enter a new team name.');
     }
-    
   };
+
 
 
   function closeTeam() {
@@ -449,6 +450,13 @@ export default function Team() {
                   </div>
                 </div>
               )}
+
+              {errorMessage && (
+                      <div className="error-message">
+                        <p>{errorMessage}</p>
+                      </div>
+              )}
+
               
             </>
 
