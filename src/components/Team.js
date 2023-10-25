@@ -58,11 +58,11 @@ export default function Team() {
   };
 
   const handleRenameTeam = () => {
-    if (newTeamName) {
-      renameTeam();
-    } else {
+    if (newTeamName.trim() === '') {
       // Show an alert with an error message
-      alert('Please enter a new team name.');
+      alert('Team name cannot be empty or contain only spaces.');
+    } else {
+      renameTeam();
     }
   };
 
@@ -421,9 +421,9 @@ export default function Team() {
                     </option>
                   ))}
                 </select>
-                <br/><button onClick={handleAddUser}>Add User</button>
-                <br/><button onClick={handleRemoveUser}>Remove User</button>
-                <br/><button onClick={openRenameTeam}>Rename Team</button>
+                <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
+                <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
+                <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
               </div>
 
               {isErrorModalOpen && (
