@@ -384,7 +384,7 @@ export default function Team() {
 
                   
                 </div>
-                <button onClick={() => closeTeam()}>Go back</button>
+                <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button>
               </div>
                 </>
 
@@ -392,7 +392,7 @@ export default function Team() {
               :
               (<>
               <p>No members in this team.</p>
-              <button onClick={() => closeTeam()}>Go back</button><br></br>
+              <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button><br></br>
               </>
               )}
               <label for='users'>Choose users:</label>
