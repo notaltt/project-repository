@@ -3,7 +3,8 @@ import Profile from "./Profile-Menu";
 import DarkMode from "./DarkMode";
 import React, { useEffect, useState } from "react";
 import { firestore as db } from "./firebase";
-import { addDoc, collection, getDocs, where, query, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "firebase/firestore";
 import { auth } from '../../src/components/firebase';
 
 export default function Team() {
@@ -17,7 +18,25 @@ export default function Team() {
   const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
-  const currentUser = auth.currentUser;
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        if (!hasFetched) {
+          fetchTeam(user);
+          fetchUsers(user);
+          setHasFetched(true);
+        }
+      } else {
+        console.log("User is not authenticated.");
+      }
+    });
+  
+    // Unsubscribe from the listener when the component unmounts
+    return () => unsubscribe();
+  }, [hasFetched]);
 
 
   const toggleSidebar = () => {
@@ -48,24 +67,43 @@ export default function Team() {
   }
 
   // every user can see all teams
-  const fetchTeam = async () => {
+  const fetchTeam = async (user) => {
     const teams = [];
     try {
-      const teamRef = collection(db, "team");
-      const teamSnapshot = await getDocs(teamRef);
-      teamSnapshot.forEach(async (doc) => {
-        const teamData = doc.data();
-        const members = teamData.members || [];
-        const totalMembers = members.length;
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
   
-        teams.push({ id: doc.id, ...teamData, totalMembers });
-      });
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const userCompany = userData.company;
+        //const userTeams = userData.teams || [];
+  
+        const teamRef = collection(db, "team");
+        const queryCompany = query(teamRef, where('fromCompany', '==', userCompany));
+        const companySnapshot = await getDocs(queryCompany);
+  
+        companySnapshot.forEach((companyDoc) => {
+          const companyData = companyDoc.data();
+          const members = companyData.members || [];
+          const totalMembers = members.length;
+          
+          teams.push({ id: companyDoc.id, ...companyData, totalMembers });
+        });
+      }
     } catch (error) {
       console.error("Error fetching team:", error);
     }
     setTeam(teams);
-    console.log("AVALAIBLE" + teams + "UNTIL HERE");
+    console.log("AVAILABLE", teams, "UNTIL HERE");
   };
+  
+
+          // teamSnapshot.forEach(async (doc) => {
+        //   const teamData = doc.data();
+        //   const members = teamData.members || [];
+        //   const totalMembers = members.length;
+  
+        // teams.push({ id: doc.id, ...teamData, totalMembers });
 
 
   // //user integrated
@@ -103,14 +141,24 @@ export default function Team() {
   //   console.log("AVAILABLE", teams);
   // };
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (user) => {
     const users = [];
     try {
-      const teamRef = collection(db, "users");
-      const teamSnapshot = await getDocs(teamRef);
-      teamSnapshot.forEach((doc) => {
-        users.push(doc.data());
-      });
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
+
+      if(userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const userCompany = userData.company;
+
+        const companyRef = collection(db, 'users');
+        const companyQuery = query(companyRef, where('company', '==', userCompany));
+        const companySnapshot = await getDocs(companyQuery);
+
+        companySnapshot.forEach((doc) => {
+          users.push(doc.data());
+        });
+      }
     } catch (error) {
       console.error("Error fetching team:", error);
     }
@@ -118,16 +166,21 @@ export default function Team() {
     console.log(users);
   };
 
-  useEffect(() => {
-    if (currentUser && !hasFetched) {
-      fetchTeam(currentUser);
-      setHasFetched(true); 
-    } else if (!currentUser) {
-      console.log("User is not authenticated.");
-    }
-
-    fetchUsers();
-  }, [currentUser, hasFetched]);
+  // const fetchUsers = async () => {
+  //   const users = [];
+  //   try {
+      
+  //     const teamRef = collection(db, "users");
+  //     const teamSnapshot = await getDocs(teamRef);
+  //     teamSnapshot.forEach((doc) => {
+  //       users.push(doc.data());
+  //     });
+  //   } catch (error) {
+  //     console.error("Error fetching team:", error);
+  //   }
+  //   setUsers(users);
+  //   console.log(users);
+  // };
 
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value); 

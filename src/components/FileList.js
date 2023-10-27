@@ -5,7 +5,7 @@ import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
 
 
 
-export default function FileList(){
+const FileList = ({ company, team }) => {
   const [listFile, setListFile] = useState([]);
   const [loading, setLoading] = useState(false);
   const [ellipsisMenuVisible, setEllipsisMenuVisible] = useState(false);
@@ -16,10 +16,10 @@ export default function FileList(){
   const [view, setView] = useState(true);
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState(null);
-  const storageRef = ref(storage, 'team/sample/');
+  const storageRef = ref(storage, `company/${company}/${team}`);
 
   useEffect(() => {
-    const listRef = ref(storage, 'team/sample/');
+    const listRef = ref(storage, `company/${company}/${team}`);
 
     listAll(listRef)
       .then(async (res) => {
@@ -48,7 +48,7 @@ export default function FileList(){
         console.error(error);
         setLoading(false);
       });
-  }, []);
+  }, [company, team]);
 
   useEffect(() =>{
     function handleClickEvent(event){
@@ -413,3 +413,5 @@ export default function FileList(){
   </>
   )
 }
+
+export default FileList;

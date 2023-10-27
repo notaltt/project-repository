@@ -9,6 +9,7 @@ import { useState } from 'react';
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [fileUploadActive, setFileUploadActive] = useState(false);
+    const [teamName, setTeamName] = useState('');
 
     const toggleFileUpload = () => {
         setFileUploadActive(!fileUploadActive);
@@ -17,11 +18,15 @@ export default function Files(){
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
     }
+
+    const handleTeamClick = (selectedTeamName) => {
+        setTeamName(selectedTeamName);
+      };
   
     return(
         <div className="flex bg-white dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }">  
            
-           <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+           <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} onTeamClick={handleTeamClick} />
 
             <div className='class="flex flex-col flex-1 w-full"'>
             <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
@@ -55,7 +60,7 @@ export default function Files(){
                         </span>
                     </button>
                     <FileUpload isVisible={fileUploadActive} />
-                    <FileList />
+                    <FileList company={"Cebu Institute of Technology - University"} team={teamName} />
                 </main>
             </div>
         </div>

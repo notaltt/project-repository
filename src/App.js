@@ -2,42 +2,34 @@ import './App.css';
 import Panel from "./components/Panel";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
-import Files from "./components/Files"
-import Team from "./components/Team"
-import Register from "./components/Register"
+import Files from "./components/Files";
+import Team from "./components/Team";
+import Register from "./components/Register";
 import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/Forgot_password';
 import Tasks from "./components/Tasks";
 import { AuthContextProvider } from './context/AuthContext';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
     <Router>
       <div className="App">
-          <div>
-            <AuthContextProvider>
-              <Routes>
-                <Route path="/" element={<Panel/>}>
-                </Route>
-                <Route path="/register" element={<Register/>}>
-                </Route>
-                <Route path="/login" element={<Login/>}>
-                </Route>
-                <Route path='/forgot-password' element={<ForgotPassword/>}> 
-                </Route>
-                <Route path="/dashboard" element={<ProtectedRoute><Dashboard/></ProtectedRoute>}>
-                </Route>
-                <Route path="/files" element={<ProtectedRoute><Files/></ProtectedRoute>}>
-                </Route>
-                <Route path="/team" element={<ProtectedRoute><Team/></ProtectedRoute>}>
-                </Route>
-                <Route path="/tasks" element={<ProtectedRoute><Tasks/></ProtectedRoute>}>
-                </Route>
-                
-              </Routes>
-            </AuthContextProvider>
-          </div>
+        <div>
+          <AuthContextProvider>
+            <Routes>
+              <Route path="/" element={<Panel />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/login" element={<Login />} />
+              <Route path='/forgot-password' element={<ForgotPassword />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
+              <Route path="/files/:teamName" element={<ProtectedRoute><Files /></ProtectedRoute>} />
+              <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+              <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+            </Routes>
+          </AuthContextProvider>
+        </div>
       </div>
     </Router>
   );
