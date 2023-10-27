@@ -18,8 +18,10 @@ export default function Team() {
   const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
-<<<<<<< HEAD
   const [currentUser, setCurrentUser] = useState(null);
+  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
+  const [newTeamName, setNewTeamName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,13 +40,7 @@ export default function Team() {
     // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [hasFetched]);
-=======
-  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
-  const currentUser = auth.currentUser;
-  const [newTeamName, setNewTeamName] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   
->>>>>>> e371a4e7d1add2c63ced0d84ef955da747523efb
 
 
   const toggleSidebar = () => {
