@@ -22,6 +22,7 @@ export default function Team() {
   const [renameTeamOpen, setRenameTeamOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isManager, setIsManager] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,6 +31,7 @@ export default function Team() {
         if (!hasFetched) {
           fetchTeam(user);
           fetchUsers(user);
+          checkUserRole(user); // Add this line to check the user's role
           setHasFetched(true);
         }
       } else {
@@ -40,6 +42,32 @@ export default function Team() {
     // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [hasFetched]);
+  
+
+  const checkUserRole = async (user) => {
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+  
+      if (userDocSnapshot.exists()) {
+        const userData = userDocSnapshot.data();
+        const userRole = userData.role; // Replace 'role' with the actual field name where the role is stored
+  
+        if (userRole === "manager") {
+          setIsManager(true);
+          console.log(userRole);
+          console.log("User is a manager");
+        }
+        else if(userRole === "member"){
+          setIsManager(false);
+          console.log(userRole);
+          console.log("User is a member");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking user role:", error);
+    }
+  };
   
 
 
@@ -448,21 +476,25 @@ export default function Team() {
               <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button><br></br>
               </>
               )}
-              <label for='users'>Choose users:</label>
+              {isManager && (
+                <>           
+                <label for='users'>Choose users:</label>
 
-              <div>
-                <select name='users' id='users' onChange={handleUserChange}>
-                  <option value=''>Select a user</option>{" "}
-                  {users.map((user) => (
-                    <option key={user.name} value={user.name}>
-                      {user.name}
-                    </option>
-                  ))}
-                </select>
-                <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
-                <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
-                <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
-              </div>
+                <div>
+                  <select name='users' id='users' onChange={handleUserChange}>
+                    <option value=''>Select a user</option>{" "}
+                    {users.map((user) => (
+                      <option key={user.name} value={user.name}>
+                        {user.name}
+                      </option>
+                    ))}
+                  </select>
+                  <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
+                  <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
+                  <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
+                </div>
+                </>
+              )}
 
               {isErrorModalOpen && (
                 <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
