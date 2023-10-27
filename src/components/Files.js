@@ -4,12 +4,32 @@ import Profile from './Profile-Menu';
 import DarkMode from './DarkMode';
 import FileList from './FileList';
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { firestore as db } from './firebase'; 
+import { auth } from '../../src/components/firebase';
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [fileUploadActive, setFileUploadActive] = useState(false);
     const [teamName, setTeamName] = useState('');
+    const [currentUser, setCurrentUser] = useState();
+    const [userCompany, setUserCompany] = useState();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            setCurrentUser(user);
+            getUserCompany(user); // Fetch the user's company
+          } else {
+            setCurrentUser();
+            setUserCompany(); // Reset userCompany when not authenticated
+          }
+        });
+    
+        return () => unsubscribe();
+      }, []);
 
     const toggleFileUpload = () => {
         setFileUploadActive(!fileUploadActive);
@@ -21,6 +41,25 @@ export default function Files(){
 
     const handleTeamClick = (selectedTeamName) => {
         setTeamName(selectedTeamName);
+    };
+
+    const getUserCompany = async (user) => {
+        try {
+            const userRef = doc(db, 'users', user.uid);
+            const userUid = await getDoc(userRef);
+        
+            if (userUid.exists) {
+                const userData = userUid.data();
+                const company = userData.company;
+                setUserCompany(company);
+            } else {
+                console.log('User document not found');
+                setUserCompany();
+            }
+            } catch (error) {
+            console.error('Error fetching user data:', error);
+            setUserCompany();
+            }
       };
   
     return(
@@ -60,7 +99,7 @@ export default function Files(){
                         </span>
                     </button>
                     <FileUpload isVisible={fileUploadActive} />
-                    <FileList company={"Cebu Institute of Technology - University"} team={teamName} />
+                    <FileList company={userCompany} team={teamName} />
                 </main>
             </div>
         </div>
