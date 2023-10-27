@@ -18,6 +18,7 @@ export default function Team() {
   const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
+<<<<<<< HEAD
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -37,11 +38,58 @@ export default function Team() {
     // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [hasFetched]);
+=======
+  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
+  const currentUser = auth.currentUser;
+  const [newTeamName, setNewTeamName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  
+>>>>>>> e371a4e7d1add2c63ced0d84ef955da747523efb
 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+  function openRenameTeam(){
+    setRenameTeamOpen(!renameTeamOpen);
+  }
+
+  function closeRenameTeam(){
+    setRenameTeamOpen(!renameTeamOpen);
+  }
+
+  const renameTeam = async () => {
+    try {
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
+  
+      await updateDoc(teamDoc, {
+        teamName: newTeamName,
+      });
+
+      console.log(`Team name updated to ${newTeamName}`);
+      
+      // Close the rename team modal or update the team name in the state.
+      setRenameTeamOpen(false);
+      // You may want to update the team name in your local state here.
+    } catch (error) {
+      console.error('Error renaming team:', error);
+      setErrorModalMessage('An error occurred while renaming the team.');
+      openErrorModal();
+    }
+    window.location.reload();
+  };
+
+  const handleRenameTeam = () => {
+    if (newTeamName.trim() === '') {
+      // Show an alert with an error message
+      alert('Team name cannot be empty or contain only spaces.');
+    } else {
+      renameTeam();
+    }
+  };
+
+
 
   function closeTeam() {
     setshowTeam(!showTeam);
@@ -187,94 +235,79 @@ export default function Team() {
   };
 
   const handleAddUser = async () => {
-    if (selectedUser) {
-      setErrorModalMessage(''); // Clear any previous error message
-      console.log(selectedUser);
-      try {
-        
-        const teamCollection = collection(db, 'team');
-        const teamDoc = doc(teamCollection, selectedId);
-        const newMember = selectedUser;
-  
-        const docSnapshot = await getDoc(teamDoc);
-        const currentMembers = docSnapshot.data().members || [];
-
-        const userCollection = collection(db, 'users');
-        const userQuery = query(userCollection, where('name', '==', selectedUser));
-        const userSnapshot = await getDocs(userQuery);
-  
-        if (currentMembers.includes(newMember)) {
-          
-          setErrorModalMessage(`${newMember} is already a member of the team.`);
-          openErrorModal();
-          console.log(`${newMember} is already a member of the team.`);
-        } else {
-          
-          currentMembers.push(newMember);
-  
-          await updateDoc(teamDoc, {
-            members: currentMembers,
-          });
-
-          if(userSnapshot.size === 1){
-            const userDoc = doc(userCollection, userSnapshot.docs[0].id);
-            const userTeam = userSnapshot.docs[0].data().teams || [];
-            userTeam.push(selectedId);
-            await updateDoc(userDoc, { teams: userTeam });
-            console.log("Teams added in the user's field.")
-          }else{
-            console.log("asdasd");
-          }
-  
-          console.log(`Added ${newMember} to the 'members' field of the document.`);
-  
-          
-          //window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error adding member:', error);
-        setErrorModalMessage('An error occurred while adding the user.'); 
-        openErrorModal();
-      }
+    if (!selectedUser) {
+      setErrorModalMessage('Please select a user before adding.');
+      openErrorModal();
+      return; // Exit the function to prevent further execution
     }
+  
+    try {
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
+      const newMember = selectedUser;
+  
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
+  
+      // Check if the selectedUser is already a member
+      if (currentMembers.includes(newMember)) {
+        setErrorModalMessage(`${newMember} is already a member of the team.`);
+        openErrorModal();
+        return; // Exit the function to prevent further execution
+      }
+  
+      // Add the selectedUser to the current members
+      currentMembers.push(newMember);
+  
+      // Update the members in the team document
+      await updateDoc(teamDoc, {
+        members: currentMembers,
+      });
+    } catch (error) {
+      console.error('Error adding member:', error);
+      setErrorModalMessage('An error occurred while adding the user.');
+      openErrorModal();
+    }
+    window.location.reload();
   };
   
 
   
   const handleRemoveUser = async () => {
-    if (selectedUser) {
-      setErrorModalMessage(''); // Clear any previous error message
-      try {
-        const teamCollection = collection(db, 'team');
-        const teamDoc = doc(teamCollection, selectedId);
-  
-        const docSnapshot = await getDoc(teamDoc);
-        const currentMembers = docSnapshot.data().members || [];
-  
-        if (!currentMembers.includes(selectedUser)) {
-
-          setErrorModalMessage(`${selectedUser} is not a member of the team.`);
-          openErrorModal();
-          console.log(`${selectedUser} is not a member of the team.`);
-        } else {
-          
-          const updatedMembers = currentMembers.filter((member) => member !== selectedUser);
-  
-          await updateDoc(teamDoc, {
-            members: updatedMembers,
-          });
-  
-          console.log(`Removed ${selectedUser} from the 'members' field of the document.`);
-  
-          
-          //window.location.reload();
-        }
-      } catch (error) {
-        console.error('Error removing member:', error);
-        setErrorModalMessage('An error occurred while removing the user.'); 
-        openErrorModal();
-      }
+    if (!selectedUser) {
+      setErrorModalMessage('Please select a user before removing.');
+      openErrorModal();
+      return; // Exit the function to prevent further execution
     }
+  
+    try {
+      const teamCollection = collection(db, 'team');
+      const teamDoc = doc(teamCollection, selectedId);
+      const userToRemove = selectedUser;
+  
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
+  
+      // Check if the selectedUser is not a member
+      if (!currentMembers.includes(userToRemove)) {
+        setErrorModalMessage(`${userToRemove} is not a member of the team.`);
+        openErrorModal();
+        return; // Exit the function to prevent further execution
+      }
+  
+      // Remove the selectedUser from the current members
+      const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
+  
+      // Update the members in the team document
+      await updateDoc(teamDoc, {
+        members: updatedMembers,
+      });
+    } catch (error) {
+      console.error('Error removing member:', error);
+      setErrorModalMessage('An error occurred while removing the user.');
+      openErrorModal();
+    }
+    window.location.reload();
   };
   
 
@@ -408,7 +441,7 @@ export default function Team() {
 
                   
                 </div>
-                <button onClick={() => closeTeam()}>Go back</button>
+                <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button>
               </div>
                 </>
 
@@ -416,7 +449,7 @@ export default function Team() {
               :
               (<>
               <p>No members in this team.</p>
-              <button onClick={() => closeTeam()}>Go back</button><br></br>
+              <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button><br></br>
               </>
               )}
               <label for='users'>Choose users:</label>
@@ -430,8 +463,9 @@ export default function Team() {
                     </option>
                   ))}
                 </select>
-                <br/><button onClick={handleAddUser}>Add User</button>
-                <br/><button onClick={handleRemoveUser}>Remove User</button>
+                <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
+                <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
+                <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
               </div>
 
               {isErrorModalOpen && (
@@ -443,6 +477,28 @@ export default function Team() {
                   </div>
                 </div>
               )}
+              {renameTeamOpen && (
+                <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
+                  <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
+                    <h2 className="text-2xl font-semibold mb-4">Input team name: </h2>
+                    <p id="error-message"><input
+                    type="text"
+                    placeholder="Enter new team name"
+                    value={newTeamName}
+                    onChange={(e) => setNewTeamName(e.target.value)}
+                    /></p>
+                    <button onClick={handleRenameTeam}className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Submit</button>
+                    <button onClick={closeRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
+                  </div>
+                </div>
+              )}
+
+              {errorMessage && (
+                      <div className="error-message">
+                        <p>{errorMessage}</p>
+                      </div>
+              )}
+
               
             </>
 
