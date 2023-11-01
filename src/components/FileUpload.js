@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import storage from './firebase';
 import { ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
 
 
-export default function FileUpload({isVisible, height}){
+export default function FileUpload({isVisible, company, team}){
   const [dragActive, setDragActive] = useState(null);
   const [file, setFile] = useState([]);
   const [percent, setPercent] = useState(0);
@@ -24,7 +24,7 @@ export default function FileUpload({isVisible, height}){
       alert("Please choose a file first!");
     } else {
       file.forEach((selectedFile) => {
-        const storageRef = ref(storage, `/team/sample/${selectedFile.name}`);
+        const storageRef = ref(storage, `/company/${company}/${team}/${selectedFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
   
         uploadTask.on(

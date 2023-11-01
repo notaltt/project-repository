@@ -16,10 +16,13 @@ const FileList = ({ company, team }) => {
   const [view, setView] = useState(true);
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState(null);
-  const storageRef = ref(storage, `company/${company}/${team}`);
+  const [currentFolder, setCurrentFolder] = useState([`company/${company}/${team}`]);
+  const path = currentFolder.join('/');
+
+  const storageRef = ref(storage, path);
 
   useEffect(() => {
-    const listRef = ref(storage, `company/${company}/${team}`);
+    const listRef = ref(storage, path);
 
     listAll(listRef)
       .then(async (res) => {
@@ -48,7 +51,7 @@ const FileList = ({ company, team }) => {
         console.error(error);
         setLoading(false);
       });
-  }, [company, team]);
+  }, [company, team, currentFolder]);
 
   useEffect(() =>{
     function handleClickEvent(event){
@@ -185,6 +188,19 @@ const FileList = ({ company, team }) => {
       console.error('Error creating folder:', error);
     }
   }
+
+  function handleFolderClicks(folderName) {
+    const newFolder = [...currentFolder, folderName];
+    setCurrentFolder(newFolder);
+  }  
+
+  function goBack() {
+    if (currentFolder.length > 1) {
+      const newFolder = [...currentFolder];
+      newFolder.pop();
+      setCurrentFolder(newFolder);
+    }
+  }
   
   return (
   <>
@@ -201,7 +217,7 @@ const FileList = ({ company, team }) => {
         </div>
       </div>
       {loading ? (
-        <p className='flex'>Loading...</p>
+        <p className='flex'>LOADING...</p>
       ) : (
         <ul>
           {listFile.length === 0 ? (
@@ -211,7 +227,7 @@ const FileList = ({ company, team }) => {
                 <div>
                   <div key={index}>
                     {prefix.isFolder ? (
-                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-gray-200'>
+                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-gray-200' onClick={() => handleFolderClicks(prefix.name)}>
                         <div className='flex'> 
                           {prefix.name} 
                         </div>

@@ -8,20 +8,23 @@ import { useState, useEffect } from 'react';
 import { firestore as db } from './firebase'; 
 import { auth } from '../../src/components/firebase';
 import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, where, query, doc,  getDoc } from "firebase/firestore";
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [fileUploadActive, setFileUploadActive] = useState(false);
     const [teamName, setTeamName] = useState('');
+    const [showJoinedTeams, setShowJoinedTeams] = useState(true);
+    const [joinedTeams, setJoinedTeams] = useState();
     const [currentUser, setCurrentUser] = useState();
     const [userCompany, setUserCompany] = useState();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
           if (user) {
+            fetchTeam(user);
             setCurrentUser(user);
-            getUserCompany(user); // Fetch the user's company
+            getUserCompany(user); 
           } else {
             setCurrentUser();
             setUserCompany(); // Reset userCompany when not authenticated
@@ -29,7 +32,7 @@ export default function Files(){
         });
     
         return () => unsubscribe();
-      }, []);
+      }, [userCompany]);
 
     const toggleFileUpload = () => {
         setFileUploadActive(!fileUploadActive);
@@ -41,6 +44,7 @@ export default function Files(){
 
     const handleTeamClick = (selectedTeamName) => {
         setTeamName(selectedTeamName);
+        setShowJoinedTeams(false);
     };
 
     const getUserCompany = async (user) => {
@@ -60,12 +64,40 @@ export default function Files(){
             console.error('Error fetching user data:', error);
             setUserCompany();
             }
-      };
+    };
+
+    const fetchTeam = async (user) => {
+        const teams = [];
+        try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnapshot = await getDoc(userRef);
+
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const userTeams = userData.teams || [];
+
+            const teamRef = collection(db, 'team');
+            const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+            const teamSnapshot = await getDocs(teamQuery);
+
+            teamSnapshot.forEach((doc) => {
+            const teamData = doc.data();
+            const members = teamData.members || [];
+            const totalMembers = members.length;
+
+            teams.push({ id: doc.id, ...teamData, totalMembers });
+            });
+        }
+        } catch (error) {
+        console.error("Error fetching team:", error);
+        }
+        setJoinedTeams(teams);
+    };
   
     return(
         <div className="flex bg-white dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }">  
            
-           <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} onTeamClick={handleTeamClick} />
+           <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
             <div className='class="flex flex-col flex-1 w-full"'>
             <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
@@ -98,8 +130,25 @@ export default function Files(){
                             <CloudIcon stroke="currentColor" />
                         </span>
                     </button>
-                    <FileUpload isVisible={fileUploadActive} />
-                    <FileList company={userCompany} team={teamName} />
+                    {showJoinedTeams && (
+                        <div>
+                            {joinedTeams && joinedTeams ? (
+                                joinedTeams.map((team) => (
+                                    <div key={team.id}>
+                                        <div className='' onClick={() => handleTeamClick(team.teamName)}>{team.teamName}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No teams are currently joined</p>
+                            )}
+                        </div>
+                    )}
+                    {userCompany && teamName && (
+                        <div>
+                            <FileUpload isVisible={fileUploadActive} company={userCompany} team={teamName} />
+                            <FileList company={userCompany} team={teamName} />
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

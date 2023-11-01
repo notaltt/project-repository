@@ -1,86 +1,9 @@
 import myImage from '../images/logo.png';
 import { ReactComponent as TaskIcon } from "../images/task.svg";
-import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, where, query, doc,  getDoc } from "firebase/firestore";
-import { firestore as db } from "./firebase";
-import { auth } from '../../src/components/firebase';
-import { Link } from 'react-router-dom';
 
-import React, { useState, useEffect } from 'react';
-
-const SideBar = ({ isOpen, toggleSidebar, onTeamClick }) => {
+const SideBar = ({ isOpen, toggleSidebar }) => {
     const currentPathname = window.location.pathname;
-    const [isFilesActive, setIsFilesActive] = useState(currentPathname === '/files');
-    const [isFilesHovered, setIsFilesHovered] = useState(false);
-    const [hasFetched, setHasFetched] = useState(false);
-    const [joinedTeams, setJoinedTeams] = useState();
-    const [currentUser, setCurrentUser] = useState(null);
-    const [TeamNameClick, onTeamNameClick] = useState();
-
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          if (user) {
-            setCurrentUser(user);
-            if (!hasFetched) {
-              fetchTeam(user);
-              setHasFetched(true);
-            }
-          } else {
-            console.log("User is not authenticated.");
-          }
-        });
-      
-        // Unsubscribe from the listener when the component unmounts
-        return () => unsubscribe();
-      }, [hasFetched]);
-    
-
-    const handleFilesMouseEnter = () => {
-        setIsFilesHovered(true);
-    };
-
-    const handleFilesMouseLeave = () => {
-        setIsFilesHovered(false);
-    };
-
-    const handleFilesClick = (teamName) => {
-        setIsFilesActive(!isFilesActive);
-    };
-    
-    
-    const fetchTeam = async (user) => {
-        const teams = [];
-        try {
-        console.log("user" + user + "ends");
-
-        const userRef = doc(db, 'users', user.uid);
-        const userSnapshot = await getDoc(userRef);
-
-        if (userSnapshot.exists()) {
-            console.log("exists");
-            const userData = userSnapshot.data();
-            const userTeams = userData.teams || [];
-
-            console.log("userTeams", userTeams);
-
-            const teamRef = collection(db, 'team');
-            const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
-            const teamSnapshot = await getDocs(teamQuery);
-
-            teamSnapshot.forEach((doc) => {
-            const teamData = doc.data();
-            const members = teamData.members || [];
-            const totalMembers = members.length;
-
-            teams.push({ id: doc.id, ...teamData, totalMembers });
-            });
-        }
-        } catch (error) {
-        console.error("Error fetching team:", error);
-        }
-        setJoinedTeams(teams);
-        console.log("AVAILABLE", teams);
-    };
+ 
 
     const navigation = [
         {
@@ -142,30 +65,12 @@ const SideBar = ({ isOpen, toggleSidebar, onTeamClick }) => {
                                     : 'dark:hover-text-red-400'
                             }`}
                             href={item.href}
-                            onMouseEnter={handleFilesMouseEnter}
-                            onMouseLeave={handleFilesMouseLeave}
-                            onClick={handleFilesClick}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                             </svg>
                             <span className="ml-4">{item.title}</span>
                         </a>
-                        {item.title === 'Files' && (isFilesHovered || isFilesActive) && (
-                        <ul>
-                            {joinedTeams ? (
-                                joinedTeams.map((team) => (
-                                <li key={team.id} onClick={() => onTeamClick(team.teamName)}>
-                                    <Link to={`/files/${team.teamName}`}>
-                                    <div className="text-sm ml-10 flex cursor-pointer">{team.teamName}</div>
-                                    </Link>
-                                </li>
-                                ))
-                            ) : (
-                                <p></p>
-                            )}
-                        </ul>
-                        )}
                     </li>
                     ))}
                 </ul>
