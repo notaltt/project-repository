@@ -18,6 +18,8 @@ export default function Files(){
     const [joinedTeams, setJoinedTeams] = useState();
     const [currentUser, setCurrentUser] = useState();
     const [userCompany, setUserCompany] = useState();
+    const [currentFolder, setCurrentFolder] = useState([]);
+
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -54,15 +56,15 @@ export default function Files(){
         
             if (userUid.exists) {
                 const userData = userUid.data();
-                const company = userData.company;
-                setUserCompany(company);
+                const userCompany = userData.company;
+                setUserCompany(userCompany);
             } else {
                 console.log('User document not found');
                 setUserCompany();
             }
             } catch (error) {
-            console.error('Error fetching user data:', error);
-            setUserCompany();
+                console.error('Error fetching user data:', error);
+                setUserCompany();
             }
     };
 
@@ -146,7 +148,7 @@ export default function Files(){
                     {userCompany && teamName && (
                         <div>
                             <FileUpload isVisible={fileUploadActive} company={userCompany} team={teamName} />
-                            <FileList company={userCompany} team={teamName} />
+                            <FileList company={userCompany} team={teamName}/>
                         </div>
                     )}
                 </main>

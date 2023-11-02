@@ -1,14 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import storage from './firebase';
+import { pushNotifications } from './notifications';
 import { ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
-
+import { doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '../../src/components/firebase';
+import { firestore as db } from "./firebase";
 
 export default function FileUpload({isVisible, company, team}){
   const [dragActive, setDragActive] = useState(null);
   const [file, setFile] = useState([]);
   const [percent, setPercent] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [userAvatar, setUserAvatar] = useState(null);
+  const [userName, setUserName] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [uploadedFileNames, setUploadedFileNames] = useState([]);
+  const [userTeam, setUserTeam] = useState(team);
+  const [currentFolder, setCurrentFolder] = useState([`company/${company}/${team}`]);
+  const path = currentFolder.join('/') || '';
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        if (!hasFetched) {
+          getUser(user);
+        }
+      } else {
+        console.log("User is not authenticated.");
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [hasFetched]);
+
+  const getUser = async (user) => {
+    try{
+      const userData = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userData);
+
+      if(userDoc.exists()){
+        const userData = userDoc.data();
+        const userAvatar = userData.avatar;
+        const userName = userData.name;
+        const userRole = userData.role;
+
+        setUserName(userName);
+        setUserAvatar(userAvatar);
+        setUserRole(userRole);
+      }
+    }catch(e){
+
+    }
+  };
 
   function handleChange(e) {
     e.preventDefault();
@@ -23,30 +71,46 @@ export default function FileUpload({isVisible, company, team}){
     if (file.length === 0) {
       alert("Please choose a file first!");
     } else {
-      file.forEach((selectedFile) => {
-        const storageRef = ref(storage, `/company/${company}/${team}/${selectedFile.name}`);
-        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+      const promises = file.map((selectedFile) => {
+        return new Promise((resolve, reject) => {
+          const storageRef = ref(storage, path + `/${selectedFile.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, selectedFile);
   
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            setUploadProgress(percent);
-          },
-          (err) => console.log(err),
-          () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-              console.log(url);
-            });
-
-            setFile((prevState) => prevState.filter((f) => f !== selectedFile));
-
-            window.location.reload();
-          }
-        );
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const percent = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+              setUploadProgress(percent);
+            },
+            (err) => {
+              reject(err);
+            },
+            () => {
+              resolve(selectedFile.name);
+            }
+          );
+        });
       });
+  
+      Promise.all(promises)
+        .then((fileNames) => {
+          setUploadedFileNames(fileNames);
+          setFile([]);
+          const notificationContent = "Added " + fileNames.join(", ");
+          const notificationData = {
+            time: new Date(),
+            type: "Uploaded files",
+            content: notificationContent,
+          };
+          pushNotifications(userTeam, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+        })
+        .catch((error) => {
+          console.error("Error while uploading files: " + error);
+        });
     }
   }
+  
+  
 
   const uploading = uploadProgress > 0 && uploadProgress < 100;
   

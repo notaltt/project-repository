@@ -6,6 +6,7 @@ import { firestore as db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "firebase/firestore";
 import { auth } from '../../src/components/firebase';
+import { pushNotifications } from './notifications';
 
 export default function Team() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -23,12 +24,16 @@ export default function Team() {
   const [newTeamName, setNewTeamName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [isManager, setIsManager] = useState(false);
+  const [userAvatar, setUserAvatar] = useState(null);
+  const [userName, setUserName] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUser(user);
         if (!hasFetched) {
+          getUser(user)
           fetchTeam(user);
           fetchUsers(user);
           checkUserRole(user); // Add this line to check the user's role
@@ -42,6 +47,26 @@ export default function Team() {
     // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [hasFetched]);
+
+  const getUser = async (user) => {
+    try{
+      const userData = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userData);
+
+      if(userDoc.exists()){
+        const userData = userDoc.data();
+        const userAvatar = userData.avatar;
+        const userName = userData.name;
+        const userRole = userData.role;
+
+        setUserName(userName);
+        setUserAvatar(userAvatar);
+        setUserRole(userRole);
+      }
+    }catch(e){
+
+    }
+  };
   
 
   const checkUserRole = async (user) => {
@@ -259,6 +284,7 @@ export default function Team() {
   };
 
   const handleAddUser = async () => {
+
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before adding.');
       openErrorModal();
@@ -269,6 +295,10 @@ export default function Team() {
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const newMember = selectedUser;
+
+      const userCollection = collection(db, 'users');
+      const userQuery = query(userCollection, where('name', '==', selectedUser));
+      const userSnapshot = await getDocs(userQuery);
   
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
@@ -287,6 +317,25 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: currentMembers,
       });
+
+      if(userSnapshot.size === 1){
+        const userDoc = doc(userCollection, userSnapshot.docs[0].id);
+        const userTeam = userSnapshot.docs[0].data().teams || [];
+        userTeam.push(selectedId);
+        await updateDoc(userDoc, { teams: userTeam });
+        console.log("Teams added in the user's field.")
+      }
+
+      const notificationData = {
+        time: new Date(),
+        type: "team",
+        content: "Added " + newMember +" to team " + selectedId 
+      }
+
+      console.log(`Added ${newMember} to the 'members' field of the document.`);
+
+      pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+
     } catch (error) {
       console.error('Error adding member:', error);
       setErrorModalMessage('An error occurred while adding the user.');
@@ -326,6 +375,14 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
+
+      const notificationData = {
+        time: new Date(),
+        type: "team",
+        content: "Removed " + userToRemove +" from team " + selectedId 
+      }
+
+      pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
     } catch (error) {
       console.error('Error removing member:', error);
       setErrorModalMessage('An error occurred while removing the user.');

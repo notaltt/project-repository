@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import storage from './firebase';
-import { ref, listAll, getDownloadURL, getMetadata, uploadString} from "firebase/storage"
+import { ref, listAll, getDownloadURL, getMetadata, uploadString, deleteObject} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
-
+import { pushNotifications } from './notifications';
+import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '../../src/components/firebase';
+import { firestore as db } from "./firebase";
 
 
 const FileList = ({ company, team }) => {
@@ -16,10 +20,34 @@ const FileList = ({ company, team }) => {
   const [view, setView] = useState(true);
   const [file, setFile] = useState(null);
   const [url, setUrl] = useState(null);
+  const [userAvatar, setUserAvatar] = useState(null);
+  const [userName, setUserName] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [folderCreate, setFolderCreate] = useState(false);
+  const [folderName, setFolderName] = useState();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [userTeam, setUserTeam] = useState(team);
   const [currentFolder, setCurrentFolder] = useState([`company/${company}/${team}`]);
-  const path = currentFolder.join('/');
+  const [deleteMenu, setDeleteMenu] = useState(false);
+  const path = currentFolder.join('/') || '';
 
   const storageRef = ref(storage, path);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+        if (!hasFetched) {
+          getUser(user);
+        }
+      } else {
+        console.log("User is not authenticated.");
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [hasFetched]);
 
   useEffect(() => {
     const listRef = ref(storage, path);
@@ -66,6 +94,26 @@ const FileList = ({ company, team }) => {
       document.removeEventListener('mousedown', handleClickEvent)
     }
   }, []);
+
+  const getUser = async (user) => {
+    try{
+      const userData = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userData);
+
+      if(userDoc.exists()){
+        const userData = userDoc.data();
+        const userAvatar = userData.avatar;
+        const userName = userData.name;
+        const userRole = userData.role;
+
+        setUserName(userName);
+        setUserAvatar(userAvatar);
+        setUserRole(userRole);
+      }
+    }catch(e){
+
+    }
+  };
 
   function toggleFileDetailModal() {
     setShowFileDetail(prev => !prev);
@@ -178,12 +226,21 @@ const FileList = ({ company, team }) => {
 
   async function createFolder(currentRef, folderName) {
     const newDir = ref(currentRef, folderName);
-  
+
+    const notificationData = {
+      time: new Date(),
+      type: "folder",
+      content: "created "+ folderName +" folder"
+    }
+    
     try {
       const readmeFile = ref(newDir, 'readme.txt');
       await uploadString(readmeFile, '');
       
+      pushNotifications(userTeam, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+
       console.log(`Folder '${folderName}' created.`);
+      setFolderCreate(false);
     } catch (error) {
       console.error('Error creating folder:', error);
     }
@@ -200,6 +257,46 @@ const FileList = ({ company, team }) => {
       newFolder.pop();
       setCurrentFolder(newFolder);
     }
+  }
+
+  function openFolderMenu(){
+    setFolderCreate(true);
+    setEllipsisMenuVisible(false);
+  }
+
+  function closeFolderMenu(){
+    setFolderCreate(false);
+  }
+
+  function deleteConfirmation(){
+    setDeleteMenu(true);
+    setEllipsisMenuVisible(false);
+  }
+
+  function closeDelete(){
+    setDeleteMenu(false);
+  }
+
+  function deleteFile(fileName){
+    const storageRef = ref(storage, path + `/${fileName}`);
+
+    const notificationData = {
+      time: new Date(),
+      type: "file",
+      content: "deleted "+ fileName
+    }
+
+    deleteObject(storageRef)
+      .then(() => {
+        console.log(`File ${fileName} deleted successfully.`);
+
+        pushNotifications(userTeam, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+
+        setDeleteMenu(false);
+      })
+      .catch((error) => {
+        console.error(`Error deleting file ${fileName}: ${error.message}`);
+      });
   }
   
   return (
@@ -316,13 +413,54 @@ const FileList = ({ company, team }) => {
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => {downloadFile(selectedFile.name);}}>Download</li>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => deleteConfirmation()}>Delete</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => setShowFileDetail(true)}>File Details</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => onViewClick(selectedFile)}>Preview File</li>
-                <li className="px-4 py-2 cursor-pointer" onClick={() => createFolder(storageRef, 'testCreate')}>Create Folder</li>
+                <li className="px-4 py-2 cursor-pointer" onClick={() => openFolderMenu()}>Create Folder</li>
               </ul>
             </div>
           </div>
         )}
+
+        {deleteMenu && selectedFile && (
+          <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-30'>
+            <div className='bg-white dark:bg-gray-900 rounded-lg p-4 shadow-md'>
+              <h2 className='text-lg font-semibold mb-4'>Are you sure deleting {selectedFile.name}?</h2>
+              <button className='bg-red-500 text-white py-2 px-4 rounded mr-2 hover:bg-blue-600' onClick={() => deleteFile(selectedFile.name)}>Yes</button>
+              <button className='bg-gray-300 text-gray-700 py-2 px-4 rounded hover-bg-gray-400' onClick={() => closeDelete()}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {folderCreate && (
+          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-30">
+            <div className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-md">
+              <h2 className="text-lg font-semibold mb-4">Create a Folder</h2>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded p-2 mb-2"
+                placeholder="Folder Name"
+                value={folderName || ''}
+                onChange={(e) => setFolderName(e.target.value)}
+              />
+              <div className="flex justify-end">
+                <button
+                  onClick={() => createFolder(storageRef, folderName)}
+                  className="bg-blue-500 text-white py-2 px-4 rounded mr-2 hover:bg-blue-600"
+                >
+                  Create
+                </button>
+                <button
+                  onClick={closeFolderMenu}
+                  className="bg-gray-300 text-gray-700 py-2 px-4 rounded hover-bg-gray-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
     </div>
     :
     <>
