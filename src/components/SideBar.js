@@ -1,7 +1,16 @@
 import myImage from '../images/logo.png';
 import { ReactComponent as TaskIcon } from "../images/task.svg";
+import React, { useEffect, useState } from "react";
+import { firestore as db } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth } from '../../src/components/firebase';
+
 
 const SideBar = ({ isOpen, toggleSidebar }) => {
+  const [hasFetched, setHasFetched] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isManager, setIsManager] = useState(false);
     const currentPathname = window.location.pathname;
  
 
@@ -32,51 +41,96 @@ const SideBar = ({ isOpen, toggleSidebar }) => {
         }
     ];
 
-    return (
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            setCurrentUser(user);
+            if (!hasFetched) {
+              checkUserRole(user); // Add this line to check the user's role
+              setHasFetched(true);
+                console.log("User is authenticated.");
+            }
+          } else {
+            console.log("User is not authenticated.");
+          }
+        });
+      
+        // Unsubscribe from the listener when the component unmounts
+        return () => unsubscribe();
+      }, [hasFetched]);
+
+      const checkUserRole = async (user) => {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnapshot = await getDoc(userDocRef);
+      
+          if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data();
+            const userRole = userData.role; // Replace 'role' with the actual field name where the role is stored
+      
+            if (userRole === "manager") {
+              setIsManager(true);
+              console.log(userRole);
+              console.log("User is a manager");
+            }
+            else if(userRole === "member"){
+              setIsManager(false);
+              console.log(userRole);
+              console.log("User is a member");
+            }
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+        }
+      };
+
+      return (
         <aside className={`z-50 text-black dark:text-white sm:sticky w-screen h-screen absolute bg-sky-200 sm:w-64 sm:h-auto dark:bg-gray-900 md:block flex-shrink-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out`}>
-            <div className="py-4">
-                <div className="flex">
-                <a className='ml-4 ' href="dashboard">
-                        <img
-                        className="mr-2 h-6 "
-                        alt='privo'
-                        src={myImage}/>
-                        
-                    </a>
-                    <a href="dashboard">
-                        <h1 className='font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-800 to-blue-800'>PRIVO</h1>
-                    </a>
-                    <button className="rounded-xl ml-64 block md:hidden p-1 dark:text-white hover:bg-blue-300 text-black" onClick={toggleSidebar}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="4" stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <ul className="mt-6">
-                    {navigation.map((item) => (
-                        <li key={item.title} className="relative px-6 py-3">
-                        {item.active && (
-                            <span className="absolute inset-y-0 left-0 w-1 bg-purple-950 le-600 rounded-tr-lg rounded-br-lg" aria-hidden="false"></span>
-                        )}
-                        <a
-                            className={`inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 ${
-                                item.active
-                                    ? 'dark:hover-text-blue-200 dark-text-purple-800'
-                                    : 'dark:hover-text-red-400'
-                            }`}
-                            href={item.href}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
-                            </svg>
-                            <span className="ml-4">{item.title}</span>
-                        </a>
-                    </li>
-                    ))}
-                </ul>
+          <div className="py-4">
+            <div className="flex">
+              <a className='ml-4 ' href="dashboard">
+                <img
+                  className="mr-2 h-6 "
+                  alt='privo'
+                  src={myImage} />
+              </a>
+              <a href="dashboard">
+                <h1 className='font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-800 to-blue-800'>PRIVO</h1>
+              </a>
+              <button className="rounded-xl ml-64 block md:hidden p-1 dark:text-white hover-bg-blue-300 text-black" onClick={toggleSidebar}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="4" stroke="currentColor" className="w-6 h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
+            <ul className="mt-6">
+              {navigation.map((item) => (
+                // Conditionally render the "Team" item based on the user's role
+                (item.title === 'Team' && !isManager) ? null : (
+                  <li key={item.title} className="relative px-6 py-3">
+                    {item.active && (
+                      <span className="absolute inset-y-0 left-0 w-1 bg-purple-950 le-600 rounded-tr-lg rounded-br-lg" aria-hidden="false"></span>
+                    )}
+                    <a
+                      className={`inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 ${
+                        item.active
+                          ? 'dark:hover-text-blue-200 dark-text-purple-800'
+                          : 'dark:hover-text-red-400'
+                      }`}
+                      href={item.href}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d={item.icon} />
+                      </svg>
+                      <span className="ml-4">{item.title}</span>
+                    </a>
+                  </li>
+                )
+              ))}
+            </ul>
+          </div>
         </aside>
-    );
+      );
 }
 
 export default SideBar;
