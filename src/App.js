@@ -5,6 +5,8 @@ import Dashboard from "./components/Dashboard";
 import Files from "./components/Files";
 import Team from "./components/Team";
 import Register from "./components/Register";
+import Profile from "./components/profile";
+import AvatarUpload from './components/AvatarUpload';
 import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/Forgot_password';
 import Tasks from "./components/Tasks";
@@ -27,6 +29,8 @@ function App() {
               <Route path="/files/:teamName" element={<ProtectedRoute><Files /></ProtectedRoute>} />
               <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/avatar" element={<ProtectedRoute><AvatarUpload /></ProtectedRoute>} />
             </Routes>
           </AuthContextProvider>
         </div>
