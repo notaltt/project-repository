@@ -95,6 +95,10 @@ export default function Files(){
         }
         setJoinedTeams(teams);
     };
+
+    const member = (length) => {
+        return length === 1 ? " member" : " members";
+    };
   
     return(
         <div className="flex bg-white dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }">  
@@ -135,11 +139,20 @@ export default function Files(){
                     {showJoinedTeams && (
                         <div>
                             {joinedTeams && joinedTeams ? (
-                                joinedTeams.map((team) => (
-                                    <div key={team.id}>
-                                        <div className='' onClick={() => handleTeamClick(team.teamName)}>{team.teamName}</div>
-                                    </div>
-                                ))
+                               <div className='overflow-x-auto p-5'>
+                               <div className='flex space-x-4'>
+                                   {joinedTeams.map((team) => (
+                                       <div key={team.id} className='flex-none'>
+                                           <div className='bg-gray-100 p-4 rounded-lg shadow-md'>
+                                               <div className='cursor-pointer' onClick={() => handleTeamClick(team.teamName)}>
+                                                   <h2 className='text-xl font-semibold dark:text-white text-gray-700'>{team.teamName}</h2>
+                                                   <p className='text-gray-500'>{team.totalMembers} {member(team.totalMembers)}</p>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   ))}
+                               </div>
+                                </div>
                             ) : (
                                 <p>No teams are currently joined</p>
                             )}

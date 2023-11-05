@@ -22,6 +22,7 @@ export default function Dashboard(){
     const [userRole, setUserRole] = useState(null);
     const [userNotification, setUserNotification] = useState([]);
     const [timePassed, setTimePassed] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
@@ -55,7 +56,6 @@ export default function Dashboard(){
             const userAvatar = userData.avatar;
             const userName = userData.name;
             const userRole = userData.role;
-    
             setUserName(userName);
             setUserAvatar(userAvatar);
             setUserRole(userRole);
@@ -71,16 +71,18 @@ export default function Dashboard(){
         const timeDifference = currentTime - notificationTime;
       
         if (timeDifference < 1000) {
-          return "just now";
+            return "just now";
         } else if (timeDifference < 60000) {
-          return Math.floor(timeDifference / 1000) + " seconds ago";
+            return Math.floor(timeDifference / 1000) + " seconds ago";
         } else if (timeDifference < 3600000) {
-          return Math.floor(timeDifference / 60000) + " minutes ago";
+            return Math.floor(timeDifference / 60000) + " minutes ago";
         } else if (timeDifference < 86400000) {
-          return Math.floor(timeDifference / 3600000) + " hours ago";
+            const hoursAgo = Math.floor(timeDifference / 3600000);
+            return hoursAgo + (hoursAgo === 1 ? " hour ago" : " hours ago");
         } else {
-          return Math.floor(timeDifference / 86400000) + " days ago";
-        }
+            const daysAgo = Math.floor(timeDifference / 86400000);
+            return daysAgo + (daysAgo === 1 ? " day ago" : " days ago");
+        }        
       };      
 
       const fetchNotifications = async (user) => {
@@ -111,6 +113,7 @@ export default function Dashboard(){
             console.log(e)
         }
         setUserNotification(notification);
+        setLoading(false);
       };
     
       const openErrorModal = () => {
@@ -157,37 +160,49 @@ export default function Dashboard(){
                 <main>
                     <div className='flex flex-row'>
                         <div className='w-3/4 p-5'>
+                            <div className='p-5 h-1/2 rounded-xl'>
+                                <h1 className='text-left text-3xl font-bold dark:text-white text-gray-700'>Announcements</h1>
+                            </div>
                             <div className='p-5 bg-slate-50 h-1/2 rounded-xl'>
-                                <h1 className='text-3xl font-bold dark:text-white text-gray-700'>Tasks</h1>
+                                <h1 className='text-left text-3xl font-bold dark:text-white text-gray-700'>Tasks</h1>
                             </div>
                         </div>
-                        {userNotification ? (
-                        userNotification.length > 0 ? (
-                            <div className='h-screen w-1/4 overflow-y-auto'>
+                        {loading ? (
+                            <div className='h-screen w-1/4 overflow-y-auto bg-gray-100'>
                                 <ul className="divide-y dark:divide-gray-100 divide-gray-100 px-6 dark:bg-gray-800 bg-gray-100">
-                                <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Notifications</h2>
-                                {userNotification.map((person) => (
-                                    <li key={person.id} className="flex justify-between gap-x-6 py-5 pe-6">
-                                    <div className="flex min-w-0 bggap-x-4">
-                                        <img className="h-12 w-12 flex-none rounded-full bg-gray-50 me-4" src={person.avatar} alt="" />
-                                        <div className="min-w-0">
-                                        <p className="text-sm text-start dark:text-white font-semibold leading-6 text-gray-900">{person.name}</p>
-                                        <p className="mt-1 truncate text-xs leading-5 dark:text-white text-gray-500">{person.content} | {person.team}</p>
-                                        </div>
-                                    </div>
-                                    <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
-                                        <p className="text-sm leading-6 dark:text-white text-gray-900">{person.role}</p>
-                                        <p className="text-xs leading-5 text-gray-500">{calculateTimePassed(person.time)}</p>
-                                    </div>
-                                    </li>
-                                ))}
+                                    <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8">Loading notifications...</h2>
                                 </ul>
                             </div>
                         ) : (
-                            <div>No notification available</div>
-                        )
-                        ) : (
-                        <div>Loading notifications...</div>
+                            userNotification.length > 0 ? (
+                                <div className='h-screen w-1/4 overflow-y-auto'>
+                                    <ul className="divide-y dark:divide-gray-100 divide-gray-100 px-6 dark:bg-gray-800 bg-gray-100">
+                                        <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Notifications</h2>
+                                        {userNotification.map((person) => (
+                                            <li key={person.id} className="flex justify-between gap-x-6 py-5 pe-6">
+                                                <div className="flex min-w-0 bggap-x-4">
+                                                    <img className="h-12 w-12 flex-none rounded-full bg-gray-50 me-4" src={person.avatar} alt="" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm text-start dark:text-white font-semibold leading-6 text-gray-900">{person.name}</p>
+                                                        <p className="mt-1 truncate text-xs leading-5 dark:text-white text-gray-500">{person.content} | {person.team}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
+                                                    <p className="text-sm leading-6 dark:text-white text-gray-900">{person.role}</p>
+                                                    <p className="text-xs leading-5 text-gray-500">{calculateTimePassed(person.time)}</p>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : (
+                                <div className='h-screen w-1/4 overflow-y-auto bg-gray-100'>
+                                    <ul className="divide-y dark:divide-gray-100 divide-gray-100 px-6 dark:bg-gray-800 bg-gray-100">
+                                        <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8">No notifications available.</h2>
+                                    </ul>
+                                </div>
+                            )
+                            
                         )}
                     </div>
                 </main>
