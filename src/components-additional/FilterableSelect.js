@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { firestore as db } from "./firebase"; 
-import { collection, getDocs } from 'firebase/firestore';
+import { firestore as db } from "../components/firebase";
+import { collection, getDocs} from 'firebase/firestore';
 
 function FilterableSelect({ onTeamChange, selectedTeam }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,7 +33,6 @@ function FilterableSelect({ onTeamChange, selectedTeam }) {
     fetchOptions();
   }, []);
 
-  // Update effect for search term and filtering
   useEffect(() => {
     if (options.length > 0) {
       const filtered = options.filter((option) =>
@@ -46,7 +45,6 @@ function FilterableSelect({ onTeamChange, selectedTeam }) {
     }
   }, [searchTerm, options, onTeamChange]);
 
-  // Now filteredOptions needs to be computed for rendering
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
