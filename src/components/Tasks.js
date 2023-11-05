@@ -4,7 +4,7 @@ import Profile from './Profile-Menu';
 import DarkMode from './DarkMode';
 import {generateDate, months } from '../components-additional/GenerateDate';
 import dayjs from "dayjs";
-import cn from './cn'
+import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import TeamSelector from '../components-additional/TeamSelector';
 
@@ -39,16 +39,14 @@ export default function Tasks() {
     <div className='flex flex-col flex-1 w-full"'> 
       <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
         <div className="flex md:justify-center flex-1 lg:mr-32">
-            <div>
-                <button className="mr-10 ml-3 rounded-lg bg-blue-200 md:hidden block dark:bg-gray-900 dark:text-white text-black p-2" onClick={toggleSidebar}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
-                </button>
-            </div>
-            <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
+              <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
               <TeamSelector onTeamSelect={handleTeamChange} />
             </div> 
+            <div>
+                <button className="mr-10 ml-3 rounded-lg bg-blue-200 block dark:bg-gray-900 dark:text-white text-black p-2">
+                  Add Task
+                </button>
+            </div>
             <div className='mt-1'>
               <DarkMode/>
             </div> 
