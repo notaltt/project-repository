@@ -5,15 +5,20 @@ import { collection, getDocs } from 'firebase/firestore';
 function FilterableSelect({ onTeamChange, selectedTeam }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Define handleInputChange
+  const handleInputChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         const optionsCollection = collection(db, 'company'); 
         const querySnapshot = await getDocs(optionsCollection);
-        const optionData = [];
-        optionData.push("Select Company:")
+        const optionData = ["Select Company:"]; // Fixed to initialize with default option
         querySnapshot.forEach((doc) => {
           optionData.push(doc.data().companyName);
         });
@@ -28,13 +33,23 @@ function FilterableSelect({ onTeamChange, selectedTeam }) {
     fetchOptions();
   }, []);
 
+  // Update effect for search term and filtering
+  useEffect(() => {
+    if (options.length > 0) {
+      const filtered = options.filter((option) =>
+        option.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  
+      const newSelected = filtered.length > 0 ? filtered[0] : "";
+      setSelectedOption(newSelected);
+      onTeamChange(newSelected);
+    }
+  }, [searchTerm, options, onTeamChange]);
+
+  // Now filteredOptions needs to be computed for rendering
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleInputChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -51,12 +66,14 @@ function FilterableSelect({ onTeamChange, selectedTeam }) {
       />
       <select
         className="block w-full px-4 py-2 border rounded-lg mt-1"
-        value={selectedTeam}
+        value={selectedOption}
         onChange={(e) => {
           console.log("Dropdown value changed:", e.target.value);
+          setSelectedOption(e.target.value);
           onTeamChange(e.target.value);
         }}
       >
+        {/* Map over the filteredOptions for rendering the dropdown */}
         {filteredOptions.map((option, index) => (
           <option key={index} value={option}>
             {option}
