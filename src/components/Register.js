@@ -32,15 +32,6 @@ export default function Register() {
   };
   
   
-  // const options = [
-  //   "",
-  //   "Cebu Institute of Technology - University",
-  //   "Hardvard University",
-  //   "Cambridge University",
-  //   "SpaceX",
-  //   "Microsoft",
-  //   "Apple",
-  // ];
 
   const handleConfirmPasswordChange = (e) => {
     const confirmPassValue = e.target.value;
@@ -101,7 +92,7 @@ export default function Register() {
   
 
   const checkUsernameExists = async (username) => {
-    const usersRef = collection(db, 'users'); // Assuming 'users' is the name of your Firestore collection
+    const usersRef = collection(db, 'users'); 
     const usernameQuery = query(usersRef, where('username', '==', username));
     const usernameSnapshot = await getDocs(usernameQuery);
     return !usernameSnapshot.empty;
@@ -164,13 +155,10 @@ export default function Register() {
       };
       
   
-      // Store additional user data in Firestore
-      // await addDoc(doc(db, "users", user.uid), userData);
       const addUser = doc(db, 'users', user.uid);
       await setDoc(addUser, userData);
 
   
-      // Clear form fields and navigate to the login page
       setEmail("");
       setName("");
       setPassword("");
@@ -309,8 +297,8 @@ return (
             </div>
           </div>
 
-          <div className="flex mt-2"> {/* <-- This is the new flex container */}
-            <div className="flex-1 mr-2"> {/* Make it take up half of the space minus margin */}
+          <div className="flex mt-2">
+            <div className="flex-1 mr-2"> 
               <div className="flex items-center justify-between">
                 <label htmlFor="password" className="block text-sm font-medium leading-6 dark:text-white text-gray-900">
                   Password
