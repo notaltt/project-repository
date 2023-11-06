@@ -36,6 +36,7 @@ export default function Dashboard(){
             name: 'Jerryvel Cabanero',
             date: 'Thu Nov 02 2023 14:20:01 GMT+0800 (Philippine Standard Time)',
             content: 'Files should be posted by today.',
+            team: 'Computer Engineering'
         }
     ];
 
@@ -206,7 +207,7 @@ export default function Dashboard(){
                                         <div className="flex-1">
                                             <div className="mb-2 flex items-center justify-between">
                                                 <span className="font-semibold">{data.name}</span>
-                                                <p className="ml-2">{data.content}</p>
+                                                <p className="ml-2">{data.content} | {data.team}</p>
                                             <div className="text-gray-500 text-sm">
                                                 {calculateTimePassed(data.date)} 
                                             </div>
