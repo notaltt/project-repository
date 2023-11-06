@@ -287,7 +287,7 @@ export default function Team() {
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before adding.');
       openErrorModal();
-      return; // Exit the function to prevent further execution
+      return; 
     }
   
     try {
@@ -302,40 +302,41 @@ export default function Team() {
       if (userSnapshot.size === 0) {
         setErrorModalMessage(`User ${selectedUser} not found.`);
         openErrorModal();
-        return; // Exit the function to prevent further execution
+        return; 
       }
   
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
+      const teamName = docSnapshot.data().teamName; 
   
       // Check if the selectedUser is already a member
       if (currentMembers.includes(newMember)) {
         setErrorModalMessage(`${newMember} is already a member of the team.`);
         openErrorModal();
-        return; // Exit the function to prevent further execution
+        return; 
       }
   
-      // Add the selectedUser to the current members
+      // Add the selectedUser 
       currentMembers.push(newMember);
   
-      // Update the members in the team document
+      // Update the members 
       await updateDoc(teamDoc, {
         members: currentMembers,
       });
   
-      // Update the user's "teams" array in the user collection
+      // Update the user's "teams" 
       userSnapshot.forEach(async (userDoc) => {
         const userTeams = userDoc.data().teams || [];
-        userTeams.push(selectedId);
+        userTeams.push(teamName); // Use teamName as the team name
         const userDocRef = doc(userCollection, userDoc.id);
         await updateDoc(userDocRef, { teams: userTeams });
-        console.log(`Added team ${selectedId} to ${newMember}'s teams.`);
+        console.log(`Added team ${teamName} to ${newMember}'s teams.`);
       });
   
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: `Added ${newMember} to team ${selectedId}`,
+        content: `Added ${newMember} to team ${teamName}`, 
       };
   
       console.log(`Added ${newMember} to the 'members' field of the document.`);
@@ -350,13 +351,14 @@ export default function Team() {
   };
   
   
+  
 
   
   const handleRemoveUser = async () => {
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before removing.');
       openErrorModal();
-      return; // Exit the function to prevent further execution
+      return; 
     }
   
     try {
@@ -366,18 +368,19 @@ export default function Team() {
   
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
+      const teamName = docSnapshot.data().teamName; 
   
       // Check if the selectedUser is not a member
       if (!currentMembers.includes(userToRemove)) {
         setErrorModalMessage(`${userToRemove} is not a member of the team.`);
         openErrorModal();
-        return; // Exit the function to prevent further execution
+        return; 
       }
   
       // Remove the selectedUser from the current members
       const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
   
-      // Update the members in the team document
+      // Update the members
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
@@ -387,22 +390,22 @@ export default function Team() {
       const userSnapshot = await getDocs(userQuery);
   
       if (userSnapshot.size > 0) {
-        // Update the user's "teams" array in the user collection
+        // Update the user's "teams" 
         userSnapshot.forEach(async (userDoc) => {
           const userData = userDoc.data();
           const userTeams = userData.teams || [];
-          const updatedTeams = userTeams.filter((teamId) => teamId !== selectedId);
+          const updatedTeams = userTeams.filter((team) => team !== teamName); 
           const userDocRef = doc(userCollection, userDoc.id);
   
           await updateDoc(userDocRef, { teams: updatedTeams });
-          console.log(`Removed team ${selectedId} from ${userToRemove}'s teams.`);
+          console.log(`Removed team ${teamName} from ${userToRemove}'s teams.`);
         });
       }
   
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: `Removed ${userToRemove} from team ${selectedId}`,
+        content: `Removed ${userToRemove} from team ${teamName}`, 
       };
   
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
@@ -413,6 +416,8 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
+  
   
   
 
