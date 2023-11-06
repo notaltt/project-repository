@@ -541,8 +541,8 @@ export default function Team() {
                   <select name='users' id='users' onChange={handleUserChange}>
                     <option value=''>Select a user</option>{" "}
                     {users.map((user) => (
-                      <option key={user.name} value={user.name}>
-                        {user.name}
+                      <option key={user.email} value={user.email}>
+                        {user.name} ({user.email})
                       </option>
                     ))}
                   </select>
