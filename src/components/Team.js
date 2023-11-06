@@ -111,16 +111,40 @@ export default function Team() {
     try {
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
+      const teamRef = await getDoc(teamDoc);
+      const oldTeamName = teamRef.data().teamName;
   
+      console.log(`Renaming team: ${oldTeamName} to ${newTeamName}`);
+  
+      // Update the team name in the team document
       await updateDoc(teamDoc, {
         teamName: newTeamName,
       });
-
+  
       console.log(`Team name updated to ${newTeamName}`);
+  
+      // Update the team name in the user documents
+      const userCollection = collection(db, 'users');
+      const userQuery = query(userCollection, where('teams', 'array-contains', oldTeamName));
+      const userSnapshot = await getDocs(userQuery);
+  
+      const updatePromises = userSnapshot.docs.map(async (userDoc) => {
+        const userData = userDoc.data();
+        const updatedTeams = userData.teams.map((team) =>
+          team === oldTeamName ? newTeamName : team
+        );
+  
+        const userDocRef = doc(userCollection, userDoc.id);
+  
+        await updateDoc(userDocRef, { teams: updatedTeams });
+        console.log(`Updated user ${userDoc.id}'s teams.`);
+      });
+  
+      // Wait for all user document updates to complete
+      await Promise.all(updatePromises);
+  
       
-      // Close the rename team modal or update the team name in the state.
       setRenameTeamOpen(false);
-      // You may want to update the team name in your local state here.
     } catch (error) {
       console.error('Error renaming team:', error);
       setErrorModalMessage('An error occurred while renaming the team.');
@@ -128,15 +152,17 @@ export default function Team() {
     }
     window.location.reload();
   };
-
+  
+  
   const handleRenameTeam = () => {
     if (newTeamName.trim() === '') {
-      // Show an alert with an error message
       alert('Team name cannot be empty or contain only spaces.');
     } else {
       renameTeam();
     }
   };
+  
+  
 
 
 
@@ -145,9 +171,9 @@ export default function Team() {
   }
   function openTeam(id) {
     setshowTeam(!showTeam);
-    let members = [];
-    // GI SUD NAKO SA STATE VARIABLE INIG CLICK PARA KIBAW UNSA NGA TEAM
-
+  
+    const members = [];
+    // Fetch the team and its members
     if (team) {
       team.forEach((element) => {
         setSelectedId(id);
@@ -160,8 +186,8 @@ export default function Team() {
       setMember(members);
     }
     console.log(id);
-    
   }
+  
 
   // every user can see all teams
   const fetchTeam = async (user) => {
