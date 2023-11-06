@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import TeamSelector from '../components-additional/TeamSelector';
+import { createUser } from './firebase';
 
 export default function Tasks() {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
@@ -14,8 +15,51 @@ export default function Tasks() {
 	const currentDate = dayjs();
 	const [today, setToday] = useState(currentDate);
 	const [selectDate, setSelectDate] = useState(currentDate);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState("");
+
+
+  const addTaskToFirestore = async (taskName, date, description) => {
+    try {
+      const data = {
+        taskName,
+        date,
+        description,
+      };
+
+      // Specify the Firestore collection name
+      const collectionName = 'tasks';
+
+      // Add the data to Firestore
+      await createUser(collectionName, data);
+
+      console.log('Task added to Firestore');
+    } catch (error) {
+      console.error('Error adding task to Firestore: ', error);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const taskName = document.getElementById('taskName').value;
+    const date = document.getElementById('date').value;
+    const description = document.getElementById('description').value;
+
+    if (taskName && date && description) {
+      addTaskToFirestore(taskName, date, description);
+      closeModal();
+    }
+  };
+  
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+  
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
 
   const user = {
     uid: 'the-user-id',
@@ -43,11 +87,11 @@ export default function Tasks() {
               <TeamSelector onTeamSelect={handleTeamChange} />
             </div> 
             <div>
-                <button className="mr-10 ml-3 rounded-lg bg-blue-200 block dark:bg-gray-900 dark:text-white text-black p-2">
-                  Add Task
-                </button>
+            <button className="mt-0 ml-5 mr-5 gap-10 h-12 w-32 flex-none rounded-full bg-sky-300 hover:bg-cyan-200 me-4 font-semibold" onClick={openModal}>
+              Add Task
+            </button>
             </div>
-            <div className='mt-1'>
+            <div className='mt-2 position-absolute right-0'>
               <DarkMode/>
             </div> 
             
@@ -140,6 +184,70 @@ export default function Tasks() {
             <p className="text-gray-400">No meetings for today.</p>
           </div>
         </div>
+
+        {isModalOpen && (
+          <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
+            <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-12">
+              <div class="aa de dn md aue avb bxo">
+                <button type="button" class="adu alo axp bkx bmz bne bnq bog" onClick={closeModal}>
+                  <span class="t">
+                    Close
+                  </span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" class="oc se">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+              <form className="space-y-6">
+                <div className="flex space-x-6">
+                  <div className="flex-1">
+                    <label htmlFor="taskName" className="flex text-lg font-medium leading-6 dark:text-white text-gray-900 items-stretch">
+                      Task Name
+                    </label>
+                    <div className="mt-2">
+                      <input
+                        placeholder="Task Name"
+                        id="taskName"
+                        name="taskName"
+                        type="text"
+                        required
+                        className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <label htmlFor="date" className="flex text-lg font-medium leading-6 dark:text-white text-gray-900 items-stretch">
+                      Date
+                    </label>
+                    <div className="mt-2">
+                      <input
+                        placeholder="Date"
+                        id="date"
+                        name="date"
+                        type="date"
+                        required
+                        className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <label htmlFor="description" className="flex text-lg font-medium leading-6 dark:text-white text-gray-900 items-stretch">
+                  Description
+                </label>
+                <div className="mt-2">
+                  <textarea
+                    placeholder="Description of Task"
+                    id="description"
+                    name="description"
+                    required
+                    className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
+                  />
+                </div>
+                <button onClick={closeModal} className="mt-4 bg-sky-300 hover:bg-cyan-200 text-white font-semibold px-6 py-3 rounded">
+                  Add
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   </div>
