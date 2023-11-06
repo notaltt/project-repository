@@ -284,7 +284,6 @@ export default function Team() {
   };
 
   const handleAddUser = async () => {
-
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before adding.');
       openErrorModal();
@@ -295,10 +294,16 @@ export default function Team() {
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const newMember = selectedUser;
-
+  
       const userCollection = collection(db, 'users');
-      const userQuery = query(userCollection, where('name', '==', selectedUser));
+      const userQuery = query(userCollection, where('email', '==', selectedUser));
       const userSnapshot = await getDocs(userQuery);
+  
+      if (userSnapshot.size === 0) {
+        setErrorModalMessage(`User ${selectedUser} not found.`);
+        openErrorModal();
+        return; // Exit the function to prevent further execution
+      }
   
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
@@ -317,25 +322,25 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: currentMembers,
       });
-
-      if(userSnapshot.size === 1){
-        const userDoc = doc(userCollection, userSnapshot.docs[0].id);
-        const userTeam = userSnapshot.docs[0].data().teams || [];
-        userTeam.push(selectedId);
-        await updateDoc(userDoc, { teams: userTeam });
-        console.log("Teams added in the user's field.")
-      }
-
+  
+      // Update the user's "teams" array in the user collection
+      userSnapshot.forEach(async (userDoc) => {
+        const userTeams = userDoc.data().teams || [];
+        userTeams.push(selectedId);
+        const userDocRef = doc(userCollection, userDoc.id);
+        await updateDoc(userDocRef, { teams: userTeams });
+        console.log(`Added team ${selectedId} to ${newMember}'s teams.`);
+      });
+  
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: "Added " + newMember +" to team " + selectedId 
-      }
-
+        content: `Added ${newMember} to team ${selectedId}`,
+      };
+  
       console.log(`Added ${newMember} to the 'members' field of the document.`);
-
+  
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
-
     } catch (error) {
       console.error('Error adding member:', error);
       setErrorModalMessage('An error occurred while adding the user.');
@@ -343,6 +348,7 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
   
 
   
@@ -375,13 +381,30 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
-
+  
+      const userCollection = collection(db, 'users');
+      const userQuery = query(userCollection, where('email', '==', userToRemove));
+      const userSnapshot = await getDocs(userQuery);
+  
+      if (userSnapshot.size > 0) {
+        // Update the user's "teams" array in the user collection
+        userSnapshot.forEach(async (userDoc) => {
+          const userData = userDoc.data();
+          const userTeams = userData.teams || [];
+          const updatedTeams = userTeams.filter((teamId) => teamId !== selectedId);
+          const userDocRef = doc(userCollection, userDoc.id);
+  
+          await updateDoc(userDocRef, { teams: updatedTeams });
+          console.log(`Removed team ${selectedId} from ${userToRemove}'s teams.`);
+        });
+      }
+  
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: "Removed " + userToRemove +" from team " + selectedId 
-      }
-
+        content: `Removed ${userToRemove} from team ${selectedId}`,
+      };
+  
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
     } catch (error) {
       console.error('Error removing member:', error);
@@ -390,6 +413,7 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
   
 
   const openErrorModal = () => {
