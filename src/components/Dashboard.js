@@ -23,10 +23,21 @@ export default function Dashboard(){
     const [userNotification, setUserNotification] = useState([]);
     const [timePassed, setTimePassed] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [userManager, setUserManger] = useState(false);
+    const [newAnnouncement, setNewAnnouncement] = useState('');
+
 
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
     }
+
+    const announceData = [
+        {
+            name: 'Jerryvel Cabanero',
+            date: 'Thu Nov 02 2023 14:20:01 GMT+0800 (Philippine Standard Time)',
+            content: 'Files should be posted by today.',
+        }
+    ];
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,12 +47,13 @@ export default function Dashboard(){
               getUser(user)
               fetchNotifications(user);
               setHasFetched(true);
+
             }
           } else {
             console.log("User is not authenticated.");
           }
         });
-      
+          
         // Unsubscribe from the listener when the component unmounts
         return () => unsubscribe();
       }, [hasFetched]);
@@ -59,6 +71,12 @@ export default function Dashboard(){
             setUserName(userName);
             setUserAvatar(userAvatar);
             setUserRole(userRole);
+
+            if(userRole === 'manager'){
+                setUserManger(true);
+            }else{
+                setUserManger(false);
+            }
           }
         }catch(e){
     
@@ -123,7 +141,11 @@ export default function Dashboard(){
       const closeErrorModal = () => {
         setisErrorModalOpen(false);
       };
-  
+
+      const addAnnouncement = () => {
+        
+      };
+    
     return(
         <div className="flex dark:bg-gray-950 bg-white">  
                       
@@ -160,8 +182,38 @@ export default function Dashboard(){
                 <main>
                     <div className='flex flex-row'>
                         <div className='w-3/4 p-5'>
-                            <div className='p-5 h-1/2 rounded-xl'>
+                            <div className='p-5 h-1/2 rounded-xl '>
                                 <h1 className='text-left text-3xl font-bold dark:text-white text-gray-700'>Announcements</h1>
+                                {userManager && (
+                                    <div className="mb-4 flex gap-3">
+                                    <input
+                                        type="text"
+                                        value={newAnnouncement}
+                                        onChange={(e) => setNewAnnouncement(e.target.value)}
+                                        placeholder="Add a new announcement"
+                                        className="w-full p-2 border border-gray-200 rounded"
+                                    />
+                                    <button
+                                        onClick={addAnnouncement}
+                                        className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        Add Announcement
+                                    </button>
+                                    </div>
+                                )}
+                                {announceData.map((data, index) => (
+                                    <div key={index} className="flex p-4 border border-gray-200 rounded mb-4">
+                                        <div className="flex-1">
+                                            <div className="mb-2 flex items-center justify-between">
+                                                <span className="font-semibold">{data.name}</span>
+                                                <p className="ml-2">{data.content}</p>
+                                            <div className="text-gray-500 text-sm">
+                                                {calculateTimePassed(data.date)} 
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                             <div className='p-5 bg-slate-50 h-1/2 rounded-xl'>
                                 <h1 className='text-left text-3xl font-bold dark:text-white text-gray-700'>Tasks</h1>
