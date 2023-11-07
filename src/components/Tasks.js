@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SideBar from './SideBar';
 import Profile from './Profile-Menu';
 import DarkMode from './DarkMode';
@@ -7,50 +7,57 @@ import dayjs from "dayjs";
 import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import TeamSelector from '../components-additional/TeamSelector';
-import { createUser } from './firebase';
+import { firestore as db  } from './firebase';
+import { getDoc, doc, collection, getDocs, where, query } from 'firebase/firestore';
 
-export default function Tasks() {
+function Tasks({ user }) {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 	const currentDate = dayjs();
 	const [today, setToday] = useState(currentDate);
 	const [selectDate, setSelectDate] = useState(currentDate);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState("");
+  const [userTeams, setUserTeams] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
 
-  const addTaskToFirestore = async (taskName, date, description) => {
-    try {
-      const data = {
-        taskName,
-        date,
-        description,
-      };
+  useEffect(() => {
+    const fetchTeams = async () => {
+      const teams = [];
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userSnapshot = await getDoc(userRef);
 
-      // Specify the Firestore collection name
-      const collectionName = 'tasks';
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.data();
+          const userCompany = userData.company;
 
-      // Add the data to Firestore
-      await createUser(collectionName, data);
+          const teamRef = collection(db, "team");
+          const queryCompany = query(teamRef, where('fromCompany', '==', userCompany));
+          const teamSnapshots = await getDocs(queryCompany);
 
-      console.log('Task added to Firestore');
-    } catch (error) {
-      console.error('Error adding task to Firestore: ', error);
-    }
-  };
+          teamSnapshots.forEach((teamDoc) => {
+            const teamData = teamDoc.data();
+            // Assuming 'members' is an array of user UIDs
+            if (teamData.members.includes(user.uid)) {
+              teams.push({ id: teamDoc.id, ...teamData });
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching teams:", error);
+      }
+      setUserTeams(teams);
+      setIsLoading(false);
+    };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+    fetchTeams();
+  }, [user]);
 
-    const taskName = document.getElementById('taskName').value;
-    const date = document.getElementById('date').value;
-    const description = document.getElementById('description').value;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-    if (taskName && date && description) {
-      addTaskToFirestore(taskName, date, description);
-      closeModal();
-    }
-  };
   
   const openModal = () => {
     setIsModalOpen(true);
@@ -61,21 +68,41 @@ export default function Tasks() {
   };
 
 
-  const user = {
-    uid: 'the-user-id',
-  };
 
-  const handleTeamChange = (team) => {
-    setSelectedTeam(team);
-    console.log(team)
-  };
-  
+
 
   console.log(generateDate());
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+    // const addTaskToFirestore = async (taskName, date, description) => {
+  //   try {
+  //     const data = { taskName, date, description, team: selectedTeam }; // Include the selected team in the task data
+
+  //     // Add the data to Firestore
+  //     await addDoc(collection(db, 'tasks'), data);
+
+  //     console.log('Task added to Firestore');
+  //   } catch (error) {
+  //     console.error('Error adding task to Firestore: ', error);
+  //   }
+  // };
+
+
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+
+  //   const taskName = document.getElementById('taskName').value;
+  //   const date = document.getElementById('date').value;
+  //   const description = document.getElementById('description').value;
+
+  //   if (taskName && date && description) {
+  //     addTaskToFirestore(taskName, date, description);
+  //     closeModal();
+  //   }
+  // };
 
   return(
   <div className="flex dark:bg-gray-950 bg-white">           
@@ -84,7 +111,7 @@ export default function Tasks() {
       <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
         <div className="flex md:justify-center flex-1 lg:mr-32">
               <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
-              <TeamSelector onTeamSelect={handleTeamChange} />
+              <TeamSelector userTeams={userTeams} />
             </div> 
             <div>
             <button className="mt-0 ml-5 mr-5 gap-10 h-12 w-32 flex-none rounded-full bg-sky-300 hover:bg-cyan-200 me-4 font-semibold" onClick={openModal}>
@@ -94,9 +121,7 @@ export default function Tasks() {
             <div className='mt-2 position-absolute right-0'>
               <DarkMode/>
             </div> 
-            
             <Profile/>
-
           </div> 
       </header>
       <main>
@@ -179,9 +204,9 @@ export default function Tasks() {
           </div>
           <div className="h-96 w-96 sm:px-5">
             <h1 className=" font-semibold">
-              Schedule for {selectDate.toDate().toDateString()}
+              Tasks for {selectDate.toDate().toDateString()}
             </h1>
-            <p className="text-gray-400">No meetings for today.</p>
+            <p className="text-gray-400">No Tasks for today.</p>
           </div>
         </div>
 
@@ -254,5 +279,7 @@ export default function Tasks() {
   )
  
 }
+
+export default Tasks;
 
 
