@@ -20,9 +20,6 @@ export default function Team() {
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [isManager, setIsManager] = useState(false);
   const [userAvatar, setUserAvatar] = useState(null);
   const [userName, setUserName] = useState(null);
@@ -99,44 +96,9 @@ export default function Team() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  function openRenameTeam(){
-    setRenameTeamOpen(!renameTeamOpen);
-  }
-
-  function closeRenameTeam(){
-    setRenameTeamOpen(!renameTeamOpen);
-  }
-
-  const renameTeam = async () => {
-    try {
-      const teamCollection = collection(db, 'team');
-      const teamDoc = doc(teamCollection, selectedId);
   
-      await updateDoc(teamDoc, {
-        teamName: newTeamName,
-      });
-
-      console.log(`Team name updated to ${newTeamName}`);
-      
-      // Close the rename team modal or update the team name in the state.
-      setRenameTeamOpen(false);
-      // You may want to update the team name in your local state here.
-    } catch (error) {
-      console.error('Error renaming team:', error);
-      setErrorModalMessage('An error occurred while renaming the team.');
-      openErrorModal();
-    }
-    window.location.reload();
-  };
-
-  const handleRenameTeam = () => {
-    if (newTeamName.trim() === '') {
-      // Show an alert with an error message
-      alert('Team name cannot be empty or contain only spaces.');
-    } else {
-      renameTeam();
-    }
-  };
+  
+  
 
 
 
@@ -145,9 +107,9 @@ export default function Team() {
   }
   function openTeam(id) {
     setshowTeam(!showTeam);
-    let members = [];
-    // GI SUD NAKO SA STATE VARIABLE INIG CLICK PARA KIBAW UNSA NGA TEAM
-
+  
+    const members = [];
+    // Fetch the team and its members
     if (team) {
       team.forEach((element) => {
         setSelectedId(id);
@@ -160,8 +122,8 @@ export default function Team() {
       setMember(members);
     }
     console.log(id);
-    
   }
+  
 
   // every user can see all teams
   const fetchTeam = async (user) => {
@@ -284,7 +246,6 @@ export default function Team() {
   };
 
   const handleAddUser = async () => {
-
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before adding.');
       openErrorModal();
@@ -292,23 +253,31 @@ export default function Team() {
     }
   
     try {
+      // Reference to the team document
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const newMember = selectedUser;
-
+  
+      // Reference to the user collection
       const userCollection = collection(db, 'users');
-      const userQuery = query(userCollection, where('name', '==', selectedUser));
+      
+      // Query for the selected user by their name (you can change this based on your database structure)
+      const userQuery = query(userCollection, where('email', '==', selectedUser));
       const userSnapshot = await getDocs(userQuery);
   
-      const docSnapshot = await getDoc(teamDoc);
-      const currentMembers = docSnapshot.data().members || [];
+      // Get the current teams of the selected user
+      const currentTeams = userSnapshot.docs[0].data().teams || [];
   
       // Check if the selectedUser is already a member
-      if (currentMembers.includes(newMember)) {
-        setErrorModalMessage(`${newMember} is already a member of the team.`);
+      if (currentTeams.includes(selectedId)) {
+        setErrorModalMessage(`${selectedUser} is already a member of the team.`);
         openErrorModal();
         return; // Exit the function to prevent further execution
       }
+  
+      // Retrieve the current team document
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
   
       // Add the selectedUser to the current members
       currentMembers.push(newMember);
@@ -317,25 +286,21 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: currentMembers,
       });
-
-      if(userSnapshot.size === 1){
-        const userDoc = doc(userCollection, userSnapshot.docs[0].id);
-        const userTeam = userSnapshot.docs[0].data().teams || [];
-        userTeam.push(selectedId);
-        await updateDoc(userDoc, { teams: userTeam });
-        console.log("Teams added in the user's field.")
-      }
-
+  
+      // Update the user's "teams" array
+      currentTeams.push(selectedId);
+      const userDoc = doc(userCollection, userSnapshot.docs[0].id);
+      await updateDoc(userDoc, { teams: currentTeams });
+  
+      // Send a notification
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: "Added " + newMember +" to team " + selectedId 
-      }
-
-      console.log(`Added ${newMember} to the 'members' field of the document.`);
-
+        content: `Added ${newMember} to team ${selectedId}`,
+      };
+  
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
-
+  
     } catch (error) {
       console.error('Error adding member:', error);
       setErrorModalMessage('An error occurred while adding the user.');
@@ -343,6 +308,9 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
+  
+  
   
 
   
@@ -354,19 +322,31 @@ export default function Team() {
     }
   
     try {
+      // Reference to the team document
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const userToRemove = selectedUser;
   
-      const docSnapshot = await getDoc(teamDoc);
-      const currentMembers = docSnapshot.data().members || [];
+      // Reference to the user collection
+      const userCollection = collection(db, 'users');
+      
+      // Query for the selected user by their email (you can change this based on your database structure)
+      const userQuery = query(userCollection, where('email', '==', selectedUser));
+      const userSnapshot = await getDocs(userQuery);
+  
+      // Get the current teams of the selected user
+      const currentTeams = userSnapshot.docs[0].data().teams || [];
   
       // Check if the selectedUser is not a member
-      if (!currentMembers.includes(userToRemove)) {
-        setErrorModalMessage(`${userToRemove} is not a member of the team.`);
+      if (!currentTeams.includes(selectedId)) {
+        setErrorModalMessage(`${selectedUser} is not a member of the team.`);
         openErrorModal();
         return; // Exit the function to prevent further execution
       }
+  
+      // Retrieve the current team document
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
   
       // Remove the selectedUser from the current members
       const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
@@ -375,14 +355,16 @@ export default function Team() {
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
-
+  
+      // Send a notification
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: "Removed " + userToRemove +" from team " + selectedId 
-      }
-
+        content: `Removed ${userToRemove} from team ${selectedId}`,
+      };
+  
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+  
     } catch (error) {
       console.error('Error removing member:', error);
       setErrorModalMessage('An error occurred while removing the user.');
@@ -390,6 +372,10 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
+  
+  
+  
   
 
   const openErrorModal = () => {
@@ -548,7 +534,7 @@ export default function Team() {
                   </select>
                   <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
                   <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
-                  <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
+                  
                 </div>
                 </>
               )}
@@ -562,27 +548,9 @@ export default function Team() {
                   </div>
                 </div>
               )}
-              {renameTeamOpen && (
-                <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
-                  <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
-                    <h2 className="text-2xl font-semibold mb-4">Input team name: </h2>
-                    <p id="error-message"><input
-                    type="text"
-                    placeholder="Enter new team name"
-                    value={newTeamName}
-                    onChange={(e) => setNewTeamName(e.target.value)}
-                    /></p>
-                    <button onClick={handleRenameTeam}className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Submit</button>
-                    <button onClick={closeRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
-                  </div>
-                </div>
-              )}
+              
 
-              {errorMessage && (
-                      <div className="error-message">
-                        <p>{errorMessage}</p>
-                      </div>
-              )}
+              
 
               
             </>
