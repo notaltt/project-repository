@@ -20,9 +20,6 @@ export default function Team() {
   const [ErrorModalMessage, setErrorModalMessage] = useState("");
   const [hasFetched, setHasFetched] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [renameTeamOpen, setRenameTeamOpen] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
   const [isManager, setIsManager] = useState(false);
   const [userAvatar, setUserAvatar] = useState(null);
   const [userName, setUserName] = useState(null);
@@ -99,68 +96,7 @@ export default function Team() {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  function openRenameTeam(){
-    setRenameTeamOpen(!renameTeamOpen);
-  }
-
-  function closeRenameTeam(){
-    setRenameTeamOpen(!renameTeamOpen);
-  }
-
-  const renameTeam = async () => {
-    try {
-      const teamCollection = collection(db, 'team');
-      const teamDoc = doc(teamCollection, selectedId);
-      const teamRef = await getDoc(teamDoc);
-      const oldTeamName = teamRef.data().teamName;
   
-      console.log(`Renaming team: ${oldTeamName} to ${newTeamName}`);
-  
-      // Update the team name in the team document
-      await updateDoc(teamDoc, {
-        teamName: newTeamName,
-      });
-  
-      console.log(`Team name updated to ${newTeamName}`);
-  
-      // Update the team name in the user documents
-      const userCollection = collection(db, 'users');
-      const userQuery = query(userCollection, where('teams', 'array-contains', oldTeamName));
-      const userSnapshot = await getDocs(userQuery);
-  
-      const updatePromises = userSnapshot.docs.map(async (userDoc) => {
-        const userData = userDoc.data();
-        const updatedTeams = userData.teams.map((team) =>
-          team === oldTeamName ? newTeamName : team
-        );
-  
-        const userDocRef = doc(userCollection, userDoc.id);
-  
-        await updateDoc(userDocRef, { teams: updatedTeams });
-        console.log(`Updated user ${userDoc.id}'s teams.`);
-      });
-  
-      // Wait for all user document updates to complete
-      await Promise.all(updatePromises);
-  
-      
-      setRenameTeamOpen(false);
-    } catch (error) {
-      console.error('Error renaming team:', error);
-      setErrorModalMessage('An error occurred while renaming the team.');
-      openErrorModal();
-    }
-    window.location.reload();
-  };
-  
-  
-  const handleRenameTeam = () => {
-    if (newTeamName.trim() === '') {
-      alert('Team name cannot be empty or contain only spaces.');
-    } else {
-      renameTeam();
-    }
-  };
   
   
 
@@ -313,61 +249,58 @@ export default function Team() {
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before adding.');
       openErrorModal();
-      return; 
+      return; // Exit the function to prevent further execution
     }
   
     try {
+      // Reference to the team document
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const newMember = selectedUser;
   
+      // Reference to the user collection
       const userCollection = collection(db, 'users');
+      
+      // Query for the selected user by their name (you can change this based on your database structure)
       const userQuery = query(userCollection, where('email', '==', selectedUser));
       const userSnapshot = await getDocs(userQuery);
   
-      if (userSnapshot.size === 0) {
-        setErrorModalMessage(`User ${selectedUser} not found.`);
-        openErrorModal();
-        return; 
-      }
-  
-      const docSnapshot = await getDoc(teamDoc);
-      const currentMembers = docSnapshot.data().members || [];
-      const teamName = docSnapshot.data().teamName; 
+      // Get the current teams of the selected user
+      const currentTeams = userSnapshot.docs[0].data().teams || [];
   
       // Check if the selectedUser is already a member
-      if (currentMembers.includes(newMember)) {
-        setErrorModalMessage(`${newMember} is already a member of the team.`);
+      if (currentTeams.includes(selectedId)) {
+        setErrorModalMessage(`${selectedUser} is already a member of the team.`);
         openErrorModal();
-        return; 
+        return; // Exit the function to prevent further execution
       }
   
-      // Add the selectedUser 
+      // Retrieve the current team document
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
+  
+      // Add the selectedUser to the current members
       currentMembers.push(newMember);
   
-      // Update the members 
+      // Update the members in the team document
       await updateDoc(teamDoc, {
         members: currentMembers,
       });
   
-      // Update the user's "teams" 
-      userSnapshot.forEach(async (userDoc) => {
-        const userTeams = userDoc.data().teams || [];
-        userTeams.push(teamName); // Use teamName as the team name
-        const userDocRef = doc(userCollection, userDoc.id);
-        await updateDoc(userDocRef, { teams: userTeams });
-        console.log(`Added team ${teamName} to ${newMember}'s teams.`);
-      });
+      // Update the user's "teams" array
+      currentTeams.push(selectedId);
+      const userDoc = doc(userCollection, userSnapshot.docs[0].id);
+      await updateDoc(userDoc, { teams: currentTeams });
   
+      // Send a notification
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: `Added ${newMember} to team ${teamName}`, 
+        content: `Added ${newMember} to team ${selectedId}`,
       };
   
-      console.log(`Added ${newMember} to the 'members' field of the document.`);
-  
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+  
     } catch (error) {
       console.error('Error adding member:', error);
       setErrorModalMessage('An error occurred while adding the user.');
@@ -378,63 +311,60 @@ export default function Team() {
   
   
   
+  
 
   
   const handleRemoveUser = async () => {
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before removing.');
       openErrorModal();
-      return; 
+      return; // Exit the function to prevent further execution
     }
   
     try {
+      // Reference to the team document
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const userToRemove = selectedUser;
   
-      const docSnapshot = await getDoc(teamDoc);
-      const currentMembers = docSnapshot.data().members || [];
-      const teamName = docSnapshot.data().teamName; 
+      // Reference to the user collection
+      const userCollection = collection(db, 'users');
+      
+      // Query for the selected user by their email (you can change this based on your database structure)
+      const userQuery = query(userCollection, where('email', '==', selectedUser));
+      const userSnapshot = await getDocs(userQuery);
+  
+      // Get the current teams of the selected user
+      const currentTeams = userSnapshot.docs[0].data().teams || [];
   
       // Check if the selectedUser is not a member
-      if (!currentMembers.includes(userToRemove)) {
-        setErrorModalMessage(`${userToRemove} is not a member of the team.`);
+      if (!currentTeams.includes(selectedId)) {
+        setErrorModalMessage(`${selectedUser} is not a member of the team.`);
         openErrorModal();
-        return; 
+        return; // Exit the function to prevent further execution
       }
+  
+      // Retrieve the current team document
+      const docSnapshot = await getDoc(teamDoc);
+      const currentMembers = docSnapshot.data().members || [];
   
       // Remove the selectedUser from the current members
       const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
   
-      // Update the members
+      // Update the members in the team document
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
   
-      const userCollection = collection(db, 'users');
-      const userQuery = query(userCollection, where('email', '==', userToRemove));
-      const userSnapshot = await getDocs(userQuery);
-  
-      if (userSnapshot.size > 0) {
-        // Update the user's "teams" 
-        userSnapshot.forEach(async (userDoc) => {
-          const userData = userDoc.data();
-          const userTeams = userData.teams || [];
-          const updatedTeams = userTeams.filter((team) => team !== teamName); 
-          const userDocRef = doc(userCollection, userDoc.id);
-  
-          await updateDoc(userDocRef, { teams: updatedTeams });
-          console.log(`Removed team ${teamName} from ${userToRemove}'s teams.`);
-        });
-      }
-  
+      // Send a notification
       const notificationData = {
         time: new Date(),
         type: "team",
-        content: `Removed ${userToRemove} from team ${teamName}`, 
+        content: `Removed ${userToRemove} from team ${selectedId}`,
       };
   
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
+  
     } catch (error) {
       console.error('Error removing member:', error);
       setErrorModalMessage('An error occurred while removing the user.');
@@ -442,6 +372,7 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
   
   
   
@@ -603,7 +534,7 @@ export default function Team() {
                   </select>
                   <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
                   <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
-                  <br/><button onClick={openRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Rename Team</button>
+                  
                 </div>
                 </>
               )}
@@ -617,27 +548,9 @@ export default function Team() {
                   </div>
                 </div>
               )}
-              {renameTeamOpen && (
-                <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
-                  <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
-                    <h2 className="text-2xl font-semibold mb-4">Input team name: </h2>
-                    <p id="error-message"><input
-                    type="text"
-                    placeholder="Enter new team name"
-                    value={newTeamName}
-                    onChange={(e) => setNewTeamName(e.target.value)}
-                    /></p>
-                    <button onClick={handleRenameTeam}className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Submit</button>
-                    <button onClick={closeRenameTeam} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
-                  </div>
-                </div>
-              )}
+              
 
-              {errorMessage && (
-                      <div className="error-message">
-                        <p>{errorMessage}</p>
-                      </div>
-              )}
+              
 
               
             </>
