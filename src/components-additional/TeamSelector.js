@@ -1,11 +1,10 @@
 import React from 'react';
 
 function TeamSelector({ userTeams }) { 
-  console.log('User Teams', userTeams); 
-  
   if (!userTeams.length) {
     return <div>No teams available or you're not part of any teams.</div>;
   }
+
   return (
     <div>
         <select
@@ -15,14 +14,15 @@ function TeamSelector({ userTeams }) {
           defaultValue=""
           id="team-select"
         >
-        {userTeams.map(team => (
-          <option key={team.id} value={team.id}>
-            {team.name}
-          </option>
-        ))}
-      </select>
+          {userTeams.map(team => (
+            <option key={team.id} value={team.id}>
+              {team.name}
+            </option>
+          ))}
+        </select>
     </div>
   );
 }
+
 
 export default TeamSelector;

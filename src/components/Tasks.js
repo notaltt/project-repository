@@ -8,7 +8,9 @@ import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import TeamSelector from '../components-additional/TeamSelector';
 import { firestore as db  } from './firebase';
-import { getDoc, doc, collection, getDocs, where, query } from 'firebase/firestore';
+import { getDoc, doc, collection, getDocs, query, where } from 'firebase/firestore';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from '../../src/components/firebase';
 
 function Tasks({ user }) {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
@@ -17,92 +19,98 @@ function Tasks({ user }) {
 	const [today, setToday] = useState(currentDate);
 	const [selectDate, setSelectDate] = useState(currentDate);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userTeams, setUserTeams] = useState([]);
+  const [currentUser, setCurrentUser] = useState();
+  const [userCompany, setUserCompany] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const [joinedTeams, setJoinedTeams] = useState();
 
-
+ 
   useEffect(() => {
-    const fetchTeams = async () => {
-      const teams = [];
-      try {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnapshot = await getDoc(userRef);
-
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data();
-          const userCompany = userData.company;
-
-          const teamRef = collection(db, "team");
-          const queryCompany = query(teamRef, where('fromCompany', '==', userCompany));
-          const teamSnapshots = await getDocs(queryCompany);
-
-          teamSnapshots.forEach((teamDoc) => {
-            const teamData = teamDoc.data();
-            // Assuming 'members' is an array of user UIDs
-            if (teamData.members.includes(user.uid)) {
-              teams.push({ id: teamDoc.id, ...teamData });
-            }
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching teams:", error);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchTeam(user);
+        setCurrentUser(user);
+        getUserCompany(user); 
+      } else {
+        setCurrentUser();
+        setUserCompany(); // Reset userCompany when not authenticated
       }
-      setUserTeams(teams);
-      setIsLoading(false);
-    };
+    });
 
-    fetchTeams();
-  }, [user]);
+    return () => unsubscribe();
+  }, [userCompany]);
+
+
+
+  const fetchTeam = async (user) => {
+    const teams = [];
+    try {
+    const userRef = doc(db, 'users', user.uid);
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const userTeams = userData.teams || [];
+
+        const teamRef = collection(db, 'team');
+        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+        const teamSnapshot = await getDocs(teamQuery);
+
+        teamSnapshot.forEach((doc) => {
+        const teamData = doc.data();
+        const members = teamData.members || [];
+        const totalMembers = members.length;
+
+        teams.push({ id: doc.id, ...teamData, totalMembers });
+        });
+    }
+    } catch (error) {
+    console.error("Error fetching team:", error);
+    }
+    setJoinedTeams(teams);
+};
+
+const member = (length) => {
+    return length === 1 ? " member" : " members";
+};
+
+  const getUserCompany = async (user) => {
+  try {
+      const userRef = doc(db, 'users', user.uid);
+      const userUid = await getDoc(userRef);
+
+      if (userUid.exists) {
+          const userData = userUid.data();
+          const userCompany = userData.company;
+          setUserCompany(userCompany);
+      } else {
+          console.log('User document not found');
+          setUserCompany();
+      }
+      } catch (error) {
+          console.error('Error fetching user data:', error);
+          setUserCompany();
+      }
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  
+
   const openModal = () => {
     setIsModalOpen(true);
   };
-  
+
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
-
-
-
 
   console.log(generateDate());
  
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-    // const addTaskToFirestore = async (taskName, date, description) => {
-  //   try {
-  //     const data = { taskName, date, description, team: selectedTeam }; // Include the selected team in the task data
-
-  //     // Add the data to Firestore
-  //     await addDoc(collection(db, 'tasks'), data);
-
-  //     console.log('Task added to Firestore');
-  //   } catch (error) {
-  //     console.error('Error adding task to Firestore: ', error);
-  //   }
-  // };
-
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-
-  //   const taskName = document.getElementById('taskName').value;
-  //   const date = document.getElementById('date').value;
-  //   const description = document.getElementById('description').value;
-
-  //   if (taskName && date && description) {
-  //     addTaskToFirestore(taskName, date, description);
-  //     closeModal();
-  //   }
-  // };
 
   return(
   <div className="flex dark:bg-gray-950 bg-white">           
@@ -111,7 +119,7 @@ function Tasks({ user }) {
       <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
         <div className="flex md:justify-center flex-1 lg:mr-32">
               <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
-              <TeamSelector userTeams={userTeams} />
+              <TeamSelector userTeams={joinedTeams} />
             </div> 
             <div>
             <button className="mt-0 ml-5 mr-5 gap-10 h-12 w-32 flex-none rounded-full bg-sky-300 hover:bg-cyan-200 me-4 font-semibold" onClick={openModal}>
