@@ -34,6 +34,11 @@ const FileList = ({ company, team }) => {
   const [deleteMenu, setDeleteMenu] = useState(false);
   const path = currentFolder.join('/') || '';
   const [fileUploadActive, setFileUploadActive] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const filesPerPage = 9;
+  const start = (currentPage - 1) * filesPerPage;
+  const end = start + filesPerPage;
+  const slicedFiles = listFile.slice(start, end);
 
   const storageRef = ref(storage, path);
 
@@ -82,6 +87,7 @@ const FileList = ({ company, team }) => {
         console.error(error);
         setLoading(false);
       });
+  
   }, [path]);
   
   const fetchUpdatedList = () => {
@@ -350,10 +356,14 @@ const FileList = ({ company, team }) => {
     }
   };
 
+  const changePage = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
   
   return (
   <>
-  <button onClick={toggleFileUpload} title="Upload" class="fixed z-90 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
+  <button onClick={toggleFileUpload} title="Upload" class="fixed z-50 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
     <span className="text-white">
         <CloudIcon stroke="currentColor" />
     </span>
@@ -363,7 +373,7 @@ const FileList = ({ company, team }) => {
 
   {view ?  <div className='p-5 bg-slate-50 rounded-lg drop-shadow-lg m-5'>
       <div className='flex items-center'>
-          <button className='flex items-center justify-center bg-blue-500 p-3 text-white rounded' onClick={() => openFolderMenu()}>
+          <button className='flex items-center justify-center bg-blue-500 p-3 text-white rounded hover:bg-blue-700' onClick={() => openFolderMenu()}>
             <div>
               <PlusIcon/>
             </div>
@@ -386,10 +396,10 @@ const FileList = ({ company, team }) => {
         <p className='flex'>LOADING...</p>
       ) : (
         <ul>
-          {listFile.length === 0 ? (
+          {slicedFiles.length === 0 ? (
               <p className='flex'>Loading...</p>
             ) : (
-              listFile.map((prefix, index) => (
+              slicedFiles.map((prefix, index) => (
                 <div>
                   <div key={index}>
                     {prefix.isFolder ? (
@@ -426,6 +436,18 @@ const FileList = ({ company, team }) => {
             )}
         </ul>
         )}
+
+        <div className="flex items-center justify-center mt-4">
+          {Array.from({ length: Math.ceil(listFile.length / filesPerPage) }, (_, index) => (
+            <button
+              key={index + 1}
+              className={`mx-2 p-2 border ${currentPage === index + 1 ? 'bg-blue-500 text-white hover:bg-blue-700' : 'bg-white text-black hover:bg-gray-100'} rounded`}
+              onClick={() => changePage(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
 
         {showFileDetail && selectedFile && (
           <>
@@ -501,7 +523,7 @@ const FileList = ({ company, team }) => {
         )}
 
         {folderCreate && (
-          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-30">
+          <div className="drop-shadow-lg fixed top-0 left-0 w-full h-full flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-md">
               <h2 className="text-lg font-semibold mb-4">Create a Folder</h2>
               <input
