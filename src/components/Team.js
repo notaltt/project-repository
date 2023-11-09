@@ -292,7 +292,7 @@ export default function Team() {
     time: ${currentTime}
     user: ${userID}
 
-    ref: ${inviteDocRef.id}
+    link: https://privo.pages.dev/invite?ref=${inviteDocRef.id}
     `);
   }
   

@@ -10,6 +10,7 @@ import AvatarUpload from './components/AvatarUpload';
 import ProtectedRoute from './components/ProtectedRoute';
 import ForgotPassword from './components/Forgot_password';
 import Tasks from "./components/Tasks";
+import Invite from "./components/Invite";
 import { AuthContextProvider } from './context/AuthContext';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
@@ -31,6 +32,7 @@ function App() {
               <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/avatar" element={<ProtectedRoute><AvatarUpload /></ProtectedRoute>} />
+              <Route path="/invite" element={<ProtectedRoute><Invite /></ProtectedRoute>} />
             </Routes>
           </AuthContextProvider>
         </div>
