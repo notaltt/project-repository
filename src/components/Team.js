@@ -7,6 +7,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "firebase/firestore";
 import { auth } from '../../src/components/firebase';
 import { pushNotifications } from './notifications';
+import FileList from './FileList';
+import Files from './Files';
 
 export default function Team() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -24,6 +26,7 @@ export default function Team() {
   const [userAvatar, setUserAvatar] = useState(null);
   const [userName, setUserName] = useState(null);
   const [userRole, setUserRole] = useState(null);
+  const [openMembers, setOpenMembers] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -99,7 +102,9 @@ export default function Team() {
   
   
   
-
+function seeMembers(){
+  setOpenMembers(!openMembers);
+}
 
 
   function closeTeam() {
@@ -157,48 +162,7 @@ export default function Team() {
   };
   
 
-          // teamSnapshot.forEach(async (doc) => {
-        //   const teamData = doc.data();
-        //   const members = teamData.members || [];
-        //   const totalMembers = members.length;
-  
-        // teams.push({ id: doc.id, ...teamData, totalMembers });
-
-
-  // //user integrated
-  // const fetchTeam = async (user) => {
-  //   const teams = [];
-  //   try {
-  //     console.log("user" + user + "ends");
-
-  //     const userRef = doc(db, 'users', user.uid);
-  //     const userSnapshot = await getDoc(userRef);
-
-  //     if (userSnapshot.exists()) {
-  //       console.log("exists");
-  //       const userData = userSnapshot.data();
-  //       const userTeams = userData.teams || [];
-
-  //       console.log("userTeams", userTeams);
-
-  //       const teamRef = collection(db, 'team');
-  //       const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
-  //       const teamSnapshot = await getDocs(teamQuery);
-
-  //       teamSnapshot.forEach((doc) => {
-  //         const teamData = doc.data();
-  //         const members = teamData.members || [];
-  //         const totalMembers = members.length;
-
-  //         teams.push({ id: doc.id, ...teamData, totalMembers });
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching team:", error);
-  //   }
-  //   setTeam(teams);
-  //   console.log("AVAILABLE", teams);
-  // };
+     
 
   const fetchUsers = async (user) => {
     const users = [];
@@ -225,21 +189,7 @@ export default function Team() {
     console.log(users);
   };
 
-  // const fetchUsers = async () => {
-  //   const users = [];
-  //   try {
-      
-  //     const teamRef = collection(db, "users");
-  //     const teamSnapshot = await getDocs(teamRef);
-  //     teamSnapshot.forEach((doc) => {
-  //       users.push(doc.data());
-  //     });
-  //   } catch (error) {
-  //     console.error("Error fetching team:", error);
-  //   }
-  //   setUsers(users);
-  //   console.log(users);
-  // };
+  
 
   const handleUserChange = (event) => {
     setSelectedUser(event.target.value); 
@@ -318,45 +268,50 @@ export default function Team() {
     if (!selectedUser) {
       setErrorModalMessage('Please select a user before removing.');
       openErrorModal();
-      return; // Exit the function to prevent further execution
+      return;
     }
   
     try {
-      // Reference to the team document
+      
       const teamCollection = collection(db, 'team');
       const teamDoc = doc(teamCollection, selectedId);
       const userToRemove = selectedUser;
   
-      // Reference to the user collection
-      const userCollection = collection(db, 'users');
       
-      // Query for the selected user by their email (you can change this based on your database structure)
+      const userCollection = collection(db, 'users');
+  
+      
       const userQuery = query(userCollection, where('email', '==', selectedUser));
       const userSnapshot = await getDocs(userQuery);
   
       // Get the current teams of the selected user
+      const userDocId = userSnapshot.docs[0].id;
       const currentTeams = userSnapshot.docs[0].data().teams || [];
   
-      // Check if the selectedUser is not a member
+      
       if (!currentTeams.includes(selectedId)) {
         setErrorModalMessage(`${selectedUser} is not a member of the team.`);
         openErrorModal();
-        return; // Exit the function to prevent further execution
+        return;
       }
   
       // Retrieve the current team document
       const docSnapshot = await getDoc(teamDoc);
       const currentMembers = docSnapshot.data().members || [];
   
-      // Remove the selectedUser from the current members
+      // Remove the selectedUser 
       const updatedMembers = currentMembers.filter((member) => member !== userToRemove);
   
-      // Update the members in the team document
+      // Update members in team doc
       await updateDoc(teamDoc, {
         members: updatedMembers,
       });
   
-      // Send a notification
+      // Update the user's "teams" 
+      const updatedUserTeams = currentTeams.filter((team) => team !== selectedId);
+      await updateDoc(doc(userCollection, userDocId), { teams: updatedUserTeams });
+  
+      
       const notificationData = {
         time: new Date(),
         type: "team",
@@ -364,7 +319,6 @@ export default function Team() {
       };
   
       pushNotifications(selectedId, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
-  
     } catch (error) {
       console.error('Error removing member:', error);
       setErrorModalMessage('An error occurred while removing the user.');
@@ -372,6 +326,7 @@ export default function Team() {
     }
     window.location.reload();
   };
+  
   
   
   
@@ -462,7 +417,7 @@ export default function Team() {
                             <div>
                               <img
                                 src={team.imageUrl}
-                                // alt={team.imageAlt}
+                                
                                 className='h-full w-full object-cover object-center'
                               />
                             </div>
@@ -484,60 +439,14 @@ export default function Team() {
               </div>
             </div>
           ) : (
+            <div className='flex flex-row'>
+              <div className='w-3/4 p-5 border-r-4 border-black-100'>
             <>
-              {team.map((team) => {
-                <h1>{team.teamName}</h1>;
-              })}
               
-              {member && member.length > 0? (
-                <>
-                <div>
-                  <h1>List of members</h1>
-                <div
-                  id='file-header'
-                  className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'
-                >
-                  <div className='flex'>
-                    <h1>Member Name</h1>
-                  </div>
-                </div>
-                <div className='h-full w-full grid  pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
-                  {member?.map((item, index) => (
-                    <div className='flex'>{item}</div>
-                  ))}
-
-                  
-                </div>
-                <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button>
-              </div>
-                </>
-
-              )
-              :
-              (<>
-              <p>No members in this team.</p>
-              <button onClick={() => closeTeam()} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Go back</button><br></br>
-              </>
-              )}
-              {isManager && (
-                <>           
-                <label for='users'>Choose users:</label>
-
-                <div>
-                  <select name='users' id='users' onChange={handleUserChange}>
-                    <option value=''>Select a user</option>{" "}
-                    {users.map((user) => (
-                      <option key={user.email} value={user.email}>
-                        {user.name} ({user.email})
-                      </option>
-                    ))}
-                  </select>
-                  <br/><button onClick={handleAddUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Add User</button>
-                  <br/><button onClick={handleRemoveUser} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Remove User</button>
-                  
-                </div>
-                </>
-              )}
+              <FileList/> 
+              {/* Test purposes */}
+              
+              
 
               {isErrorModalOpen && (
                 <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
@@ -554,6 +463,69 @@ export default function Team() {
 
               
             </>
+            </div>
+            <div className="min-h-screen w-1/4 overflow-y-auto max-h-screen">
+              <ul className="divide-y dark:divide-gray-100 divide-gray-100 px-2 dark:bg-gray-800 bg-white-100 list-disc">
+                <h2 className="text-3xl font-bold dark:text-white text-gray-700 py-8 sm:py-12 lg:py-8 border-b-2 border-gray-500">Settings</h2>
+                {isManager && (
+                <>           
+                <label for='users' className="p-4 m-4">Choose user:</label>
+
+                <div>
+                  <select name='users' id='users' onChange={handleUserChange} classNam="w-screen">
+                    <option value=''>Select a user</option>{" "}
+                    {users.map((user) => (
+                      <option key={user.email} value={user.email}>
+                        {user.name} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                  
+                </div>
+                </>
+              )}
+              <div className="h-1/4 flex flex-wrap-row">
+                <button onClick={handleAddUser} className="bg-sky-300 text-white py-1 px-1 rounded m-2">Add User</button>
+                <button onClick={handleRemoveUser} className="bg-sky-300 text-white py-1 px-1 rounded m-2">Remove User</button>
+                <button
+                  onClick={seeMembers}
+                  className={`py-1 px-2 rounded m-2 ${openMembers ? 'bg-white border border-blue-500 text-blue-500' : 'bg-sky-300 text-white'}`}
+                >
+                  Members
+                </button>
+              </div>
+              {member && member.length > 0? (
+                <>
+                <div>
+                <div className='h-full w-full grid  pl-2 pt-3 pb-3 border-b border-white-300'>
+                {openMembers && (
+                  <div>
+                    <h3 className="text-1xl font-bold dark:text-white text-gray-700 py-4 sm:py-12 lg:py-8 border-t-2 border-gray-500">Members</h3>
+                    {member?.map((item, index) => (
+                      <div className="my-5" key={index}>
+                        <li className='flex justify-between gap-x-3 py-1 pe-6 hover:bg-gray-300'>{item}</li>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                  
+                </div>
+                
+              </div>
+                </>
+
+              )
+              :
+              (<>
+                <p>No members in this team.</p>
+              </>
+              )}
+              </ul>
+            </div>
+                
+          </div>
+          
 
             
           )}
