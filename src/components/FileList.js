@@ -7,7 +7,9 @@ import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "fireb
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../../src/components/firebase';
 import { firestore as db } from "./firebase";
-
+import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
+import { ReactComponent as PlusIcon } from '../images/plus.svg';
+import FileUpload from './FileUpload';
 
 const FileList = ({ company, team }) => {
   const [listFile, setListFile] = useState([]);
@@ -31,6 +33,7 @@ const FileList = ({ company, team }) => {
   const [currentFolder, setCurrentFolder] = useState([`company/${company}/${team}`]);
   const [deleteMenu, setDeleteMenu] = useState(false);
   const path = currentFolder.join('/') || '';
+  const [fileUploadActive, setFileUploadActive] = useState(false);
 
   const storageRef = ref(storage, path);
 
@@ -51,18 +54,18 @@ const FileList = ({ company, team }) => {
 
   useEffect(() => {
     const listRef = ref(storage, path);
-
+  
     listAll(listRef)
       .then(async (res) => {
         const files = [];
-
+  
         for (const prefixRef of res.prefixes) {
           files.push({
             name: prefixRef.name,
-            isFolder: true, 
+            isFolder: true,
           });
         }
-
+  
         for (const itemRef of res.items) {
           const metadata = await getMetadata(itemRef);
           files.push({
@@ -71,7 +74,7 @@ const FileList = ({ company, team }) => {
             type: metadata.contentType,
           });
         }
-
+  
         setListFile(files);
         setLoading(false);
       })
@@ -79,7 +82,39 @@ const FileList = ({ company, team }) => {
         console.error(error);
         setLoading(false);
       });
-  }, [company, team, currentFolder]);
+  }, [path]);
+  
+  const fetchUpdatedList = () => {
+    const listRef = ref(storage, path);
+  
+    listAll(listRef)
+      .then(async (res) => {
+        const files = [];
+  
+        for (const prefixRef of res.prefixes) {
+          files.push({
+            name: prefixRef.name,
+            isFolder: true,
+          });
+        }
+  
+        for (const itemRef of res.items) {
+          const metadata = await getMetadata(itemRef);
+          files.push({
+            name: itemRef.name,
+            size: metadata.size,
+            type: metadata.contentType,
+          });
+        }
+  
+        setListFile(files);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
+  };  
 
   useEffect(() =>{
     function handleClickEvent(event){
@@ -189,23 +224,24 @@ const FileList = ({ company, team }) => {
 
   function handleEllipsisClick(event, file) {
     event.preventDefault();
-
-    if(selectedFile === file){
-      setEllipsisMenuPosition(false);
+  
+    if (selectedFile === file) {
+      setEllipsisMenuPosition(null);
       setSelectedFile(null);
     } else {
       const ellipsisIcon = event.currentTarget;
       const ellipsisIconRect = ellipsisIcon.getBoundingClientRect();
-      const top = ellipsisIconRect.bottom; 
-      const left = ellipsisIconRect.left;
   
-      const adjustleft = left - 110;
-      
-      setEllipsisMenuPosition({ top, left:  adjustleft});
+      // Adjust the top and left based on the icon's position
+      const top = event.clientY - 90; // Adjust this value if needed
+      const left = event.clientX - 330; // Adjust this value if needed
+  
+      setEllipsisMenuPosition({ top, left });
       setSelectedFile(file);
       setEllipsisMenuVisible(true);
     }
   }
+  
 
   function onViewClick(file){
     setView(!view);
@@ -240,6 +276,7 @@ const FileList = ({ company, team }) => {
       pushNotifications(userTeam, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
 
       console.log(`Folder '${folderName}' created.`);
+      fetchUpdatedList();
       setFolderCreate(false);
     } catch (error) {
       console.error('Error creating folder:', error);
@@ -289,6 +326,7 @@ const FileList = ({ company, team }) => {
     deleteObject(storageRef)
       .then(() => {
         console.log(`File ${fileName} deleted successfully.`);
+        fetchUpdatedList();
 
         pushNotifications(userTeam, userAvatar, userName, userRole, notificationData.time, notificationData.type, notificationData.content);
 
@@ -298,11 +336,42 @@ const FileList = ({ company, team }) => {
         console.error(`Error deleting file ${fileName}: ${error.message}`);
       });
   }
+
+  const toggleFileUpload = () => {
+    setFileUploadActive(!fileUploadActive);
+  };
+
+  const renamePath = (path) => {
+    const segments = path.split('/');
+    if (segments.length >= 3) {
+      return `... ${'>'} ${segments.slice(2).join(' > ')}`;
+    } else {
+      return path;
+    }
+  };
+
   
   return (
   <>
-  {view ?  <div>
-      <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 border-b border-gray-300'>
+  <button onClick={toggleFileUpload} title="Upload" class="fixed z-90 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
+    <span className="text-white">
+        <CloudIcon stroke="currentColor" />
+    </span>
+  </button>
+
+  <FileUpload isVisible={fileUploadActive} company={company} team={team} path={path} uploadSuccess={fetchUpdatedList}/>
+
+  {view ?  <div className='p-5 bg-slate-50 rounded-lg drop-shadow-lg m-5'>
+      <div className='flex items-center'>
+          <button className='flex items-center justify-center bg-blue-500 p-3 text-white rounded' onClick={() => openFolderMenu()}>
+            <div>
+              <PlusIcon/>
+            </div>
+            Create Folder
+          </button>
+          <h1 className='ml-4 text-left cursor-pointer' onClick={() => goBack()}>{renamePath(path)}</h1>
+      </div>
+      <div id='file-header' className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-2 border-b border-gray-300'>
         <div className='flex'>
           <h1>Name</h1>
         </div>
@@ -324,7 +393,7 @@ const FileList = ({ company, team }) => {
                 <div>
                   <div key={index}>
                     {prefix.isFolder ? (
-                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-gray-200' onClick={() => handleFolderClicks(prefix.name)}>
+                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out' onClick={() => handleFolderClicks(prefix.name)}>
                         <div className='flex'> 
                           {prefix.name} 
                         </div>
@@ -336,7 +405,7 @@ const FileList = ({ company, team }) => {
                         </div>
                       </div>
                     ):(
-                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-gray-200'>
+                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out'>
                         <div className='flex'>
                           <h1>{prefix.name}</h1>
                         </div>
@@ -409,14 +478,13 @@ const FileList = ({ company, team }) => {
         )}
 
         {ellipsisMenuVisible && selectedFile && (
-          <div className="absolute items-center justify-center max-w-[150px]" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
+          <div className="fixed top-0 left-0 transform -translate-x-1/2 -translate-y-1/2 items-center justify-center" style={{ top: ellipsisMenuPosition.top, left: ellipsisMenuPosition.left }}>
             <div className="bg-white border rounded shadow-md p-2">
               <ul>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => {downloadFile(selectedFile.name);}}>Download</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => deleteConfirmation()}>Delete</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => setShowFileDetail(true)}>File Details</li>
                 <li className="px-4 py-2 cursor-pointer" onClick={() => onViewClick(selectedFile)}>Preview File</li>
-                <li className="px-4 py-2 cursor-pointer" onClick={() => openFolderMenu()}>Create Folder</li>
               </ul>
             </div>
           </div>
@@ -443,7 +511,7 @@ const FileList = ({ company, team }) => {
                 value={folderName || ''}
                 onChange={(e) => setFolderName(e.target.value)}
               />
-              <div className="flex justify-end">
+              <div className="flex justify-center items-center">
                 <button
                   onClick={() => createFolder(storageRef, folderName)}
                   className="bg-blue-500 text-white py-2 px-4 rounded mr-2 hover:bg-blue-600"

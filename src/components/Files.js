@@ -12,13 +12,14 @@ import { collection, getDocs, where, query, doc,  getDoc } from "firebase/firest
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [fileUploadActive, setFileUploadActive] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [showJoinedTeams, setShowJoinedTeams] = useState(true);
     const [joinedTeams, setJoinedTeams] = useState();
     const [currentUser, setCurrentUser] = useState();
     const [userCompany, setUserCompany] = useState();
-    const [currentFolder, setCurrentFolder] = useState([]);
+    const [loadingTeams, setLoadingTeams] = useState(true);
+    const [fileListKey, setFileListKey] = useState(0);
+
 
 
     useEffect(() => {
@@ -36,17 +37,14 @@ export default function Files(){
         return () => unsubscribe();
       }, [userCompany]);
 
-    const toggleFileUpload = () => {
-        setFileUploadActive(!fileUploadActive);
-    };
-
     const toggleSidebar = () => {
       setIsSidebarOpen(!isSidebarOpen);
     }
 
     const handleTeamClick = (selectedTeamName) => {
         setTeamName(selectedTeamName);
-        setShowJoinedTeams(false);
+        setShowJoinedTeams(true);
+        setFileListKey((prevKey) => prevKey + 1);
     };
 
     const getUserCompany = async (user) => {
@@ -94,6 +92,7 @@ export default function Files(){
         console.error("Error fetching team:", error);
         }
         setJoinedTeams(teams);
+        setLoadingTeams(false);
     };
 
     const member = (length) => {
@@ -131,39 +130,56 @@ export default function Files(){
                 </div> 
             </header>
                 <main>
-                    <button onClick={toggleFileUpload} title="Upload" class="fixed z-90 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
-                        <span className="text-white">
-                            <CloudIcon stroke="currentColor" />
-                        </span>
-                    </button>
                     {showJoinedTeams && (
                         <div>
-                            {joinedTeams && joinedTeams ? (
-                               <div className='overflow-x-auto p-5'>
-                               <div className='flex space-x-4'>
-                                   {joinedTeams.map((team) => (
-                                       <div key={team.id} className='flex-none'>
-                                           <div className='bg-gray-100 p-4 rounded-lg shadow-md'>
-                                               <div className='cursor-pointer' onClick={() => handleTeamClick(team.teamName)}>
-                                                   <h2 className='text-xl font-semibold dark:text-white text-gray-700'>{team.teamName}</h2>
-                                                   <p className='text-gray-500'>{team.totalMembers} {member(team.totalMembers)}</p>
-                                               </div>
-                                           </div>
-                                       </div>
-                                   ))}
-                               </div>
+                            {loadingTeams ? (
+                            <div className='overflow-x-auto p-5'>
+                                <div className='flex space-x-4'>
+                                {Array.from({ length: 3 }).map((_, index) => (
+                                    <div key={index} className='flex-none animate-pulse'>
+                                    <div className='bg-slate-50 p-4 rounded-lg shadow-md'>
+                                        <div className='h-8 w-12 bg-gray-300 rounded mb-2'></div>
+                                        <div className='h-4 w-12 bg-gray-300 rounded'></div>
+                                    </div>
+                                    </div>
+                                ))}
                                 </div>
+                            </div>
                             ) : (
-                                <p>No teams are currently joined</p>
+                            <div className='overflow-x-auto'>
+                                <div className='flex space-x-4'>
+                                {joinedTeams && joinedTeams.length > 0 ? (
+                                    <div className='overflow-x-auto p-5'>
+                                        <div className='flex space-x-4'>
+                                        {joinedTeams.map((team) => (
+                                            <div key={team.id} className='flex-none'>
+                                            <div className={`p-4 rounded-lg cursor-pointer ${teamName === team.teamName ? 'bg-slate-200' : 'bg-slate-50 shadow-md '}`} onClick={() => handleTeamClick(team.teamName)}>
+                                                <h2 className='text-xl font-semibold dark:text-white text-gray-700'>{team.teamName}</h2>
+                                                <p className='text-gray-500'>{team.totalMembers} {member(team.totalMembers)}</p>
+                                            </div>
+                                            </div>
+                                        ))}
+                                        </div>
+                                    </div>
+                                    ) : (
+                                    <p>No teams are currently joined</p>
+                                    )}
+                                </div>
+                            </div>
                             )}
                         </div>
                     )}
-                    {userCompany && teamName && (
+
+                    {teamName !== '' ? (
+                        <div key={fileListKey}>
+                            <FileList company={userCompany} team={teamName} />
+                        </div>
+                    ) : (
                         <div>
-                            <FileUpload isVisible={fileUploadActive} company={userCompany} team={teamName} />
-                            <FileList company={userCompany} team={teamName}/>
+                            Click a team...
                         </div>
                     )}
+
                 </main>
             </div>
         </div>
