@@ -8,7 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../../src/components/firebase';
 import { firestore as db } from "./firebase";
 
-export default function FileUpload({isVisible, company, team}){
+export default function FileUpload({isVisible, company, team, path, uploadSuccess}){
   const [dragActive, setDragActive] = useState(null);
   const [file, setFile] = useState([]);
   const [percent, setPercent] = useState(0);
@@ -20,8 +20,6 @@ export default function FileUpload({isVisible, company, team}){
   const [userRole, setUserRole] = useState(null);
   const [uploadedFileNames, setUploadedFileNames] = useState([]);
   const [userTeam, setUserTeam] = useState(team);
-  const [currentFolder, setCurrentFolder] = useState([`company/${company}/${team}`]);
-  const path = currentFolder.join('/') || '';
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -94,6 +92,11 @@ export default function FileUpload({isVisible, company, team}){
   
       Promise.all(promises)
         .then((fileNames) => {
+
+          if (uploadSuccess){
+            uploadSuccess();
+          }
+          
           setUploadedFileNames(fileNames);
           setFile([]);
           const notificationContent = "Added " + fileNames.join(", ");
