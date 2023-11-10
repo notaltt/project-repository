@@ -19,6 +19,8 @@ export default function Files(){
     const [userCompany, setUserCompany] = useState();
     const [loadingTeams, setLoadingTeams] = useState(true);
     const [fileListKey, setFileListKey] = useState(0);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+
 
 
 
@@ -45,6 +47,11 @@ export default function Files(){
         setTeamName(selectedTeamName);
         setShowJoinedTeams(true);
         setFileListKey((prevKey) => prevKey + 1);
+    };
+
+    const clickJoinTeam = (teamName) => {
+        setSelectedTeam((prevTeam) => (prevTeam === teamName ? null : teamName));
+        setTeamName('');
     };
 
     const getUserCompany = async (user) => {
@@ -130,45 +137,52 @@ export default function Files(){
                 </div> 
             </header>
                 <main>
-                    {showJoinedTeams && (
-                        <div>
-                            {loadingTeams ? (
-                            <div className='overflow-x-auto p-5'>
-                                <div className='flex space-x-4'>
-                                {Array.from({ length: 3 }).map((_, index) => (
-                                    <div key={index} className='flex-none animate-pulse'>
-                                    <div className='bg-slate-50 p-4 rounded-lg shadow-md'>
-                                        <div className='h-8 w-12 bg-gray-300 rounded mb-2'></div>
-                                        <div className='h-4 w-12 bg-gray-300 rounded'></div>
-                                    </div>
-                                    </div>
-                                ))}
+                    <div>
+                        {loadingTeams ? (
+                        <div className='overflow-x-auto p-5'>
+                            <div className='flex space-x-4'>
+                            {Array.from({ length: 5 }).map((_, index) => (
+                                <div key={index} className='flex-none animate-pulse'>
+                                <div className='bg-slate-50 p-4 rounded-lg shadow-md'>
+                                    <div className='h-8 w-12 bg-gray-300 rounded mb-2'></div>
+                                    <div className='h-4 w-12 bg-gray-300 rounded'></div>
                                 </div>
+                                </div>
+                            ))}
                             </div>
-                            ) : (
-                            <div className='overflow-x-auto'>
-                                <div className='flex space-x-4'>
-                                {joinedTeams && joinedTeams.length > 0 ? (
-                                    <div className='overflow-x-auto p-5'>
-                                        <div className='flex space-x-4'>
-                                        {joinedTeams.map((team) => (
+                        </div>
+                        ) : (
+                        <div className='overflow-x-auto'>
+                            <div className='flex space-x-4'>
+                            {joinedTeams && joinedTeams.length > 0 && showJoinedTeams &&  (
+                                <div className='overflow-x-auto p-5'>
+                                    <div className='flex space-x-4'>
+                                    {joinedTeams.map((team) => (
+                                        <div className='flex'>
                                             <div key={team.id} className='flex-none'>
-                                            <div className={`p-4 rounded-lg cursor-pointer ${teamName === team.teamName ? 'bg-slate-200' : 'bg-slate-50 shadow-md '}`} onClick={() => handleTeamClick(team.teamName)}>
-                                                <h2 className='text-xl font-semibold dark:text-white text-gray-700'>{team.teamName}</h2>
-                                                <p className='text-gray-500'>{team.totalMembers} {member(team.totalMembers)}</p>
+                                                <div className={`p-4 rounded-lg cursor-pointer ${teamName === team.teamName ? 'bg-slate-200' : 'bg-slate-50 shadow-md '}`} onClick={() => handleTeamClick(team.teamName)}>
+                                                    <h2 className='text-xl font-semibold dark:text-white text-gray-700'>{team.teamName}</h2>
+                                                    <p className='text-gray-500'>{team.totalMembers} {member(team.totalMembers)}</p>
+                                                </div>
                                             </div>
+                                        </div>
+                                    ))}
+
+                                    <div className='flex'>
+                                        <div className='flex-none'>
+                                            <div className={`p-4 rounded-lg cursor-pointer ${teamName === '' ? 'bg-slate-200' : 'bg-slate-50 shadow-md'}`} onClick={() => clickJoinTeam(null)}>
+                                                <h2 className='text-xl font-semibold dark:text-white text-gray-700'>Join a team</h2>
+                                                <p className='text-gray-500'>(Use the code given by your manager)</p>
                                             </div>
-                                        ))}
                                         </div>
                                     </div>
-                                    ) : (
-                                    <p>No teams are currently joined</p>
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
                             )}
+                            </div>
                         </div>
-                    )}
+                        )}
+                    </div>
 
                     {teamName !== '' ? (
                         <div key={fileListKey}>

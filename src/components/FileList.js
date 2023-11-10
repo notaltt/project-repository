@@ -39,6 +39,7 @@ const FileList = ({ company, team }) => {
   const start = (currentPage - 1) * filesPerPage;
   const end = start + filesPerPage;
   const slicedFiles = listFile.slice(start, end);
+  const [visible, setVisible] = useState(true);
 
   const storageRef = ref(storage, path);
 
@@ -56,6 +57,14 @@ const FileList = ({ company, team }) => {
   
     return () => unsubscribe();
   }, [hasFetched]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setVisible(false);
+    }, 3000); // Adjust the duration as needed
+
+    return () => clearTimeout(timeout);
+  },);
 
   useEffect(() => {
     const listRef = ref(storage, path);
@@ -397,7 +406,14 @@ const FileList = ({ company, team }) => {
       ) : (
         <ul>
           {slicedFiles.length === 0 ? (
-              <p className='flex'>Loading...</p>
+              <div>
+                {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className='flex-none animate-pulse'>
+                  <div className='bg-slate-50 p-4 rounded-lg shadow-md'>
+                    <div className='h-3/4 w-3/4 bg-gray-300 rounded mb-2'></div>
+                  </div>
+                </div>))}
+              </div>
             ) : (
               slicedFiles.map((prefix, index) => (
                 <div>
@@ -513,7 +529,7 @@ const FileList = ({ company, team }) => {
         )}
 
         {deleteMenu && selectedFile && (
-          <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-black bg-opacity-30'>
+          <div className='fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 drop-shadow-lg'>
             <div className='bg-white dark:bg-gray-900 rounded-lg p-4 shadow-md'>
               <h2 className='text-lg font-semibold mb-4'>Are you sure deleting {selectedFile.name}?</h2>
               <button className='bg-red-500 text-white py-2 px-4 rounded mr-2 hover:bg-blue-600' onClick={() => deleteFile(selectedFile.name)}>Yes</button>

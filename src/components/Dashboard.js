@@ -10,8 +10,6 @@ import { auth } from '../../src/components/firebase';
 import { pushNotifications } from './notifications';
 
 
-
-
 export default function Dashboard(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isErrorModalOpen, setisErrorModalOpen] = useState(false);
