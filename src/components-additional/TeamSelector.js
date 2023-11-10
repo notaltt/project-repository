@@ -1,6 +1,7 @@
 import React from 'react';
 
 function TeamSelector({ userTeams }) { 
+
   if (!userTeams.length) {
     return <div>No teams available or you're not part of any teams.</div>;
   }

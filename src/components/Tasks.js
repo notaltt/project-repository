@@ -83,6 +83,7 @@ const member = (length) => {
           const userData = userUid.data();
           const userCompany = userData.company;
           setUserCompany(userCompany);
+          setIsLoading(false);
       } else {
           console.log('User document not found');
           setUserCompany();
@@ -119,7 +120,27 @@ const member = (length) => {
       <header className='justify-content z-10 mt-5 bg-white shadow-md dark:bg-gray-950'>
         <div className="flex md:justify-center flex-1 lg:mr-32">
               <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
-              <TeamSelector userTeams={joinedTeams} />
+              <div>
+                <select
+                  className="w-full pl-8 pr-2 text-large dark:text-black text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 
+                  dark:bg-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input"
+                  aria-label="Choose Team"
+                  defaultValue=""
+                  id="team-select"
+                >
+                  {joinedTeams.length > 0 ? (
+                        joinedTeams.map((team) => (
+                          <option key={team.id}>
+                            {team.teamName}
+                          </option>
+                        ))
+                  ): (
+                    <div>
+                        No teams available or you're not part of any teams.
+                    </div>
+                  )}
+                </select>
+            </div>
             </div> 
             <div>
             <button className="mt-0 ml-5 mr-5 gap-10 h-12 w-32 flex-none rounded-full bg-sky-300 hover:bg-cyan-200 me-4 font-semibold" onClick={openModal}>
