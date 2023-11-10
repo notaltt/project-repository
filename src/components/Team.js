@@ -4,7 +4,7 @@ import DarkMode from "./DarkMode";
 import React, { useEffect, useState } from "react";
 import { firestore as db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, where, query, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, where, query, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
 import { auth } from '../../src/components/firebase';
 import { pushNotifications } from './notifications';
 import FileList from './FileList';
@@ -102,9 +102,9 @@ export default function Team() {
   
   
   
-function seeMembers(){
-  setOpenMembers(!openMembers);
-}
+  function seeMembers(){
+    setOpenMembers(!openMembers);
+  }
 
 
   function closeTeam() {
@@ -192,7 +192,7 @@ function seeMembers(){
   
 
   const handleUserChange = (event) => {
-    setSelectedUser(event.target.value); 
+    setSelectedUser(event.target.value);
   };
 
   const handleAddUser = async () => {
@@ -259,10 +259,42 @@ function seeMembers(){
     window.location.reload();
   };
   
-  
-  
-  
+  const handleInviteUser = async () => {
+    const user = auth.currentUser;
+    const currentuserid = user.uid;
 
+    const teamCollection = collection(db, 'team');
+    const teamDoc = doc(teamCollection, selectedId).id;
+
+    const userCollection = collection(db, 'users');
+    const userQuery = query(userCollection, where('email', '==', selectedUser));
+    const userSnapshot = (await getDocs(userQuery));
+    const userID = userSnapshot.docs[0].id;
+
+    // Get the current time
+    const currentTime = new Date();
+
+    // Reference to the 'invites' collection
+    const invitesCollection = collection(db, 'invites');
+
+    // Create a new document in the 'invites' collection
+    const inviteDocRef = await addDoc(invitesCollection, {
+        manager: userName,
+        team: teamDoc,
+        time: currentTime,
+        user: userID,
+    });
+
+    alert(`
+    Sent Invite Successfully!
+    manager: ${userName}
+    team: ${teamDoc}
+    time: ${currentTime}
+    user: ${userID}
+
+    link: https://privo.pages.dev/invite?ref=${inviteDocRef.id}
+    `);
+  }
   
   const handleRemoveUser = async () => {
     if (!selectedUser) {
@@ -485,6 +517,7 @@ function seeMembers(){
                 </>
               )}
               <div className="h-1/4 flex flex-wrap-row">
+                <button onClick={handleInviteUser} className="bg-sky-300 text-white py-1 px-1 rounded m-2">Invite User</button>
                 <button onClick={handleAddUser} className="bg-sky-300 text-white py-1 px-1 rounded m-2">Add User</button>
                 <button onClick={handleRemoveUser} className="bg-sky-300 text-white py-1 px-1 rounded m-2">Remove User</button>
                 <button
