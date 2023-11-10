@@ -128,7 +128,7 @@ const member = (length) => {
                   defaultValue=""
                   id="team-select"
                 >
-                  {joinedTeams.length > 0 ? (
+                  {joinedTeams && joinedTeams.length > 0 ? (
                         joinedTeams.map((team) => (
                           <option key={team.id}>
                             {team.teamName}
