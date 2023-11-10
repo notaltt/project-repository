@@ -25,7 +25,7 @@ const AuthDetails = () => {
     <div>
       {user ? (
         <div>
-          <p>Welcome, <span>{user.email}</span></p>
+          <p>Welcome, <span className='text-lg'>{user.email}</span></p>
           {/* Add additional user details here */}
         </div>
       ) : (
