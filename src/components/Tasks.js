@@ -155,8 +155,29 @@ const member = (length) => {
       </header>
       <main>
         {/* <div className="mt-5 flex gap-10 sm:divide-x justify-center sm:w-1/2 mx-auto h-screen items-center sm:flex-row flex-col"> */}
-        <div className="mt-5 ml-10 flex sm:flex-row flex-col sm:divide-x sm:w-1/2 h-screen gap-10">
+        <div className="mt-5 ml-10 flex sm:flex-row flex-col sm:divide-x w-full justify-center h-screen gap-10">
           <div className="w-96 h-96 ">
+            <h1 className="font-semibold">Added Tasks</h1>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+            <div className="mt-4 border rounded p-2">
+              Make Tasks
+            </div>
+          </div>
+          <div className=" w-96 h-96">
             <div className="flex justify-between items-center">
               <h1 className="select-none font-semibold">
                 {months[today.month()]}, {today.year()}
