@@ -188,7 +188,7 @@ export default function FileUpload({isVisible, company, team, path, uploadSucces
             </span>
             <p><span className="font-semibold">Click to select file</span> or drag and drop</p>
           </div>
-          <input id="dropzone-file" type="file" class="hidden" onChange={handleChange} multiple/>
+          <input id="dropzone-file" type="file" className="hidden" onChange={handleChange} multiple/>
 
           <div className="flex gap-2 mt-3 justify-center items-center">
             <button id="upload-button"className="bg-blue-500 text-blue-50 px-2 py-1 rounded-md" onClick={handleSubmitFile} 
@@ -199,13 +199,13 @@ export default function FileUpload({isVisible, company, team, path, uploadSucces
 
         <div className="grid grid-cols-3 mt-2">
             {file.map((file, i) => (
-              <div key={i} class="bg-white rounded-lg max-w-150 max-h-150 shadow-md mx-auto mt-2">
-              <div class="text-center p-6">
+              <div key={i} className="bg-white rounded-lg max-w-150 max-h-150 shadow-md mx-auto mt-2">
+              <div className="text-center p-6">
                 <p className="w-32 overflow-hidden font-semibold">{truncateText(file.name, 10)}</p>
-                <p class="text-gray-600">{humanFileSize(file.size)}</p>
+                <p className="text-gray-600">{humanFileSize(file.size)}</p>
               </div>
-              <div class="" onClick={() => removeFile(file.name, i)}>
-                <p class="border-t cursor-pointer border-gray-300 bg-gray-100 p-3 text-center rounded hover:text-white hover:bg-blue-500 hover:border-white transition-colors"
+              <div className="" onClick={() => removeFile(file.name, i)}>
+                <p className="border-t cursor-pointer border-gray-300 bg-gray-100 p-3 text-center rounded hover:text-white hover:bg-blue-500 hover:border-white transition-colors"
                   onClick={() => removeFile(file.name, i)}>REMOVE</p>
               </div>
             </div>
