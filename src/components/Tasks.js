@@ -64,7 +64,7 @@ function Tasks({ user }) {
   
       if (userDocSnapshot.exists()) {
         const userData = userDocSnapshot.data();
-        const userRole = userData.role; // Replace 'role' with the actual field name where the role is stored
+        const userRole = userData.role;
   
         if (userRole === "manager") {
           setIsManager(true);
@@ -105,8 +105,13 @@ function Tasks({ user }) {
 
           teams.push({ id: doc.id, ...teamData, totalMembers });
           });
-          if (teams.length > 0) {
-            setSelectedTeam(teams[0].teamName);
+          if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const userTeams = userData.teams || [];
+            // ...existing code to push teams...
+            if (teams.length > 0) {
+              setSelectedTeam(teams[0].teamName);
+            }
           }
       } 
     } catch (error) {
@@ -114,6 +119,7 @@ function Tasks({ user }) {
     }
     setJoinedTeams(teams);
   };
+
 
 
   const getUser = async (user) => {
@@ -379,13 +385,12 @@ function Tasks({ user }) {
                       Assign a user
                     </label>
                     <div className='mt-2'>
-                      <select name='users' id='users' onChange={handleUserChange} classNam="w-screen">
-                        <option value=''>Choose user</option>{" "}
-                        {users.map((user) => (
-                          <option key={user.email} value={user.email}>
-                            {user.name} ({user.email})
-                          </option>
-                        ))}
+                    <select name='users' id='users' onChange={handleUserChange} className="block w-full px-4 py-2 border rounded-lg mt-1">
+                      {users.map((user, index) => (
+                        <option key={index} value={user.email}>
+                          {user.name} ({user.email})
+                        </option>
+                      ))}
                     </select>
                     </div>
                   </div>

@@ -16,7 +16,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      toast.success("Logged In")
       await signIn(email, password);
       navigate('/dashboard');
     } catch (e) {
