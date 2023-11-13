@@ -3,50 +3,36 @@ import React, { useState } from 'react';
 import DarkMode from './DarkMode';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
+import { Toaster, toast } from 'sonner'
 
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { signIn } = UserAuth();
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-
-  const openErrorModal = () => {
-    setIsErrorModalOpen(true);
-  };
-  
-  const closeErrorModal = () => {
-    setIsErrorModalOpen(false);
-  };
-  
 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('')
     try {
+      toast.success("Logged In")
       await signIn(email, password);
       navigate('/dashboard');
     } catch (e) {
-
-      let errorMessage = '';
       if (e.code === 'auth/user-not-found') {
-        errorMessage = 'User not found. Please check your email.';
+        toast.error("User not found. Please check your email.");
       } else if (e.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password. Please try again.';
+        toast.error("Incorrect password. Please try again.");
       } else {
-        errorMessage = e.message; // Use the original message if no specific handling is needed
+        toast.error(e.message);
       }
-      setError(errorMessage);
-    openErrorModal(); // Open the error modal
-  console.log(errorMessage);
     }
   };
 
   return (
     <div className="flex relative flex-1 h-screen dark:bg-gray-900 bg-white flex-col px-6 py-12 lg:px-8">
+      <Toaster position="top-center" richColors />
     <div className='absolute right-5 top-5'>
     <DarkMode/> 
     </div>
@@ -129,15 +115,6 @@ const Login = () => {
      </Link>
    </p>
  </div>
- {isErrorModalOpen && (
-        <div id="modal" className="fixed top-0 left-0 w-full h-full bg-opacity-80 bg-gray-900 flex justify-center items-center">
-          <div className="bg-white dark:text-white dark:bg-gray-500 rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-semibold mb-4">Error!</h2>
-            <p id="error-message">{error}</p>
-            <button onClick={closeErrorModal} className="mt-4 bg-purple-500 hover:bg-purple-400 text-white font-semibold px-4 py-2 rounded">Close</button>
-          </div>
-        </div>
-      )}
  
 </div>
 </div>
