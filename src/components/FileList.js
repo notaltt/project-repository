@@ -10,6 +10,11 @@ import { firestore as db } from "./firebase";
 import {ReactComponent as CloudIcon} from '../images/cloudicon.svg';
 import { ReactComponent as PlusIcon } from '../images/plus.svg';
 import FileUpload from './FileUpload';
+import { ReactComponent as FolderIcon} from '../images/folder.svg';
+import { ReactComponent as DocumentIcon} from '../images/document.svg';
+import { ReactComponent as VideoIcon} from '../images/video.svg';
+import { ReactComponent as GifIcon } from '../images/gif.svg'
+import { ReactComponent as ImageIcon} from '../images/image.svg';
 
 const FileList = ({ company, team }) => {
   const [listFile, setListFile] = useState([]);
@@ -369,6 +374,8 @@ const FileList = ({ company, team }) => {
     setCurrentPage(newPage);
   };
 
+
+
   
   return (
   <>
@@ -420,7 +427,10 @@ const FileList = ({ company, team }) => {
                   <div key={index}>
                     {prefix.isFolder ? (
                       <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 cursor-pointer border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out' onClick={() => handleFolderClicks(prefix.name)}>
-                        <div className='flex'> 
+                        <div className='flex'>
+                          <div className='text-slate-600 mr-2'>
+                            <FolderIcon/> 
+                          </div>
                           {prefix.name} 
                         </div>
                         <div className='flex'>
