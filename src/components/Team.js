@@ -4,11 +4,12 @@ import DarkMode from "./DarkMode";
 import React, { useEffect, useState } from "react";
 import { firestore as db } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, getDocs, where, query, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
+import { collection, getDocs, where, query, doc, updateDoc, getDoc, addDoc, writeBatch } from "firebase/firestore";
 import { auth } from '../../src/components/firebase';
 import { pushNotifications } from './notifications';
 import FileList from './FileList';
 import Files from './Files';
+import { Toaster, toast } from 'sonner'
 
 export default function Team() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -47,6 +48,17 @@ export default function Team() {
     // Unsubscribe from the listener when the component unmounts
     return () => unsubscribe();
   }, [hasFetched]);
+
+  useEffect(() => {
+    if(isManager)
+      checkInvites();
+    else
+      console.log('not checking invites. user is not manager');
+
+    return () => {
+      // Cleanup logic goes here
+    };
+  }, []);
 
   const getUser = async (user) => {
     try{
@@ -94,7 +106,39 @@ export default function Team() {
     }
   };
   
+  const checkInvites = async () => {
+    try {
+      console.log('Checking for invites...');
+  
+      // Get the current timestamp
+      // const currentTime = firebase.firestore.FieldValue.serverTimestamp();
+  
+      // Query invites that have a 'time' greater than 1 hour ago
+      const thresholdTime = new Date(Date.now() - 60 * 60 * 1000); // 1 hour ago
+      const inviteRef = collection(db, 'invites');
+      // const querySnapshot = await
+      //   collection(db, "invites")
+      //   // .collection('invites')
+      //   .where('time', '<', thresholdTime)
+      //   .get();
 
+      const querySnapshot = query(inviteRef, where("time", "<", thresholdTime));
+  
+      // Delete the documents that meet the criteria
+      const batch = writeBatch(db);
+      
+      querySnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+  
+      // Commit the batch delete
+      await batch.commit();
+  
+      console.log('Invites checked and deleted successfully.');
+    } catch (error) {
+      console.error('Error checking invites:', error);
+    }
+  }
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -285,15 +329,14 @@ export default function Team() {
         user: userID,
     });
 
-    alert(`
-    Sent Invite Successfully!
-    manager: ${userName}
-    team: ${teamDoc}
-    time: ${currentTime}
-    user: ${userID}
-
-    link: https://privo.pages.dev/invite?ref=${inviteDocRef.id}
-    `);
+    toast(
+      <div className="text-lg">
+        <p>Sent Invite Successfully!</p>
+        <a href = {`https://privo.pages.dev/invite?ref=${inviteDocRef.id}`}
+        className="text-blue-500 hover:text-blue-700">
+          https://privo.pages.dev/invite?ref={inviteDocRef.id}</a>
+      </div>
+    );
   }
   
   const handleRemoveUser = async () => {
@@ -389,13 +432,13 @@ export default function Team() {
                   xmlns='http://www.w3.org/2000/svg'
                   fill='none'
                   viewBox='0 0 24 24'
-                  stroke-width='1.5'
+                  strokeWidth='1.5'
                   stroke='currentColor'
-                  class='w-6 h-6'
+                  className='w-6 h-6'
                 >
                   <path
-                    stroke-linecap='round'
-                    stroke-linejoin='round'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
                     d='M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5'
                   />
                 </svg>
@@ -442,6 +485,7 @@ export default function Team() {
                     <div className='cursor-pointer mt-6 space-y-12 lg:grid lg:grid-cols-3 lg:gap-x-6 lg:space-y-0'>
                       {team?.map((team) => (
                         <div
+                        key={team.id}
                           className='group relative'
                           onClick={() => openTeam(team.id)}
                         >
@@ -504,7 +548,7 @@ export default function Team() {
                 <label for='users' className="p-4 m-4">Choose user:</label>
 
                 <div>
-                  <select name='users' id='users' onChange={handleUserChange} classNam="w-screen">
+                  <select name='users' id='users' onChange={handleUserChange} className="">
                     <option value=''>Select a user</option>{" "}
                     {users.map((user) => (
                       <option key={user.email} value={user.email}>
@@ -562,6 +606,7 @@ export default function Team() {
 
             
           )}
+          <Toaster/>
         </main>
       </div>
     </div>

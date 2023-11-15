@@ -379,7 +379,7 @@ const FileList = ({ company, team }) => {
   
   return (
   <>
-  <button onClick={toggleFileUpload} title="Upload" class="fixed z-50 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
+  <button onClick={toggleFileUpload} title="Upload" className="fixed z-50 bottom-10 right-8 bg-blue-600 w-20 h-20 rounded-full drop-shadow-lg flex justify-center items-center text-white text-4xl hover:bg-blue-700 hover:drop-shadow-2xl">
     <span className="text-white">
         <CloudIcon stroke="currentColor" />
     </span>
