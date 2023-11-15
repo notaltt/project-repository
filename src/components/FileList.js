@@ -13,8 +13,10 @@ import FileUpload from './FileUpload';
 import { ReactComponent as FolderIcon} from '../images/folder.svg';
 import { ReactComponent as DocumentIcon} from '../images/document.svg';
 import { ReactComponent as VideoIcon} from '../images/video.svg';
-import { ReactComponent as GifIcon } from '../images/gif.svg'
 import { ReactComponent as ImageIcon} from '../images/image.svg';
+import { ReactComponent as TextDocIcon } from '../images/textdoc.svg';
+import { ReactComponent as AudioIcon } from '../images/audio.svg'
+import { ReactComponent as UknownIcon } from '../images/unknown.svg'
 
 const FileList = ({ company, team }) => {
   const [listFile, setListFile] = useState([]);
@@ -374,8 +376,25 @@ const FileList = ({ company, team }) => {
     setCurrentPage(newPage);
   };
 
+  const renderIcon = (fileType) => {
 
+    const file = fileType.split('/')[0];
 
+    switch (file) {
+      case 'image':
+        return <ImageIcon/>
+      case 'video':
+        return <VideoIcon/>
+      case 'text':
+        return <TextDocIcon/>
+      case 'audio':
+        return <AudioIcon/>
+      case 'application':
+        return <DocumentIcon/>
+      default:
+        return <UknownIcon/>
+    }
+  }
   
   return (
   <>
@@ -443,6 +462,9 @@ const FileList = ({ company, team }) => {
                     ):(
                       <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out'>
                         <div className='flex'>
+                          <div className='text-slate-600 mr-2'>
+                            {renderIcon(prefix.type)} 
+                          </div>
                           <h1>{prefix.name}</h1>
                         </div>
                         <div className='flex'>

@@ -236,7 +236,7 @@ export default function Dashboard(){
                                                     <div className="min-w-0">
                                                         <p className="text-sm text-start dark:text-white font-semibold leading-6 text-gray-900">{person.name}</p>
                                                         <p className="mt-1 truncate text-xs leading-5 dark:text-white text-gray-500">{person.content} | {person.team}</p>
-                                                    </div>
+                                                    </div>  
                                                 </div>
                                                 <div className="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
                                                     <p className="text-sm leading-6 dark:text-white text-gray-900">{person.role}</p>
