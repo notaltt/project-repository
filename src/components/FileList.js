@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import storage from './firebase';
 import { ref, listAll, getDownloadURL, getMetadata, uploadString, deleteObject} from "firebase/storage"
 import {ReactComponent as Ellipsis} from '../images/ellipsis.svg';
@@ -47,7 +47,8 @@ const FileList = ({ company, team }) => {
   const end = start + filesPerPage;
   const slicedFiles = listFile.slice(start, end);
   const [visible, setVisible] = useState(true);
-
+  const [isSelected, setIsSelected] = useState(false);
+  const pressTimer = useRef(null);
   const storageRef = ref(storage, path);
 
   useEffect(() => {
@@ -395,6 +396,29 @@ const FileList = ({ company, team }) => {
         return <UknownIcon/>
     }
   }
+
+  const handleMouseDown = () => {
+    pressTimer.current = Date.now();
+  };
+
+  const handleMouseUp = () => {
+    const pressDuration = Date.now() - pressTimer.current;
+
+    if (pressDuration > 1000) {
+      // If the duration is greater than 1000 milliseconds (1 second), consider it a long press
+      setIsSelected(true);
+      // onFileSelected(prefix.id); // Assuming prefix.id is a unique identifier for each file
+    } else {
+      // If the duration is less than 1000 milliseconds, consider it a regular click
+      setIsSelected(!isSelected);
+      // onFileSelected(prefix.id); // Assuming prefix.id is a unique identifier for each file
+    }
+  };
+
+  const handleClick = () => {
+    // This prevents a regular click from being triggered after a long press
+    clearTimeout(pressTimer.current);
+  };
   
   return (
   <>
@@ -460,7 +484,7 @@ const FileList = ({ company, team }) => {
                         </div>
                       </div>
                     ):(
-                      <div className='h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out'>
+                      <div className={`h-full w-full grid grid-cols-3 pl-2 pt-3 pb-3 border-b border-gray-300 hover:bg-slate-100 transition duration-300 ease-in-out ${ isSelected ? 'bg-slate-200' : ''}`} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onClick={handleClick}>
                         <div className='flex'>
                           <div className='text-slate-600 mr-2'>
                             {renderIcon(prefix.type)} 
