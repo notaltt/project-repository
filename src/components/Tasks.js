@@ -6,7 +6,7 @@ import {generateDate, months } from '../components-additional/GenerateDate';
 import dayjs from "dayjs";
 import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
-import { firestore as db  } from './firebase';
+import { firestore as db, addDoc } from './firebase'; 
 import { getDoc, doc, collection, getDocs, query, where } from 'firebase/firestore';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../../src/components/firebase';
@@ -119,70 +119,6 @@ function Tasks({ user }) {
     }
   },[]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (currentUser) {
-        await checkUserRole(currentUser);
-        await fetchTeam(currentUser);
-        await getUser(currentUser);
-      }
-    };
-  
-    fetchData();
-  }, [currentUser, checkUserRole, fetchTeam, getUser]);
-
-  
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
-      if (authenticatedUser) {
-        // Set user state
-        setCurrentUser(authenticatedUser);
-
-        // Fetch teams and company data
-        fetchTeam(authenticatedUser);
-        getUserCompany(authenticatedUser);
-
-        // Check the user role
-        checkUserRole(authenticatedUser);
-      } else {
-        // Reset states when the user is not authenticated
-        setCurrentUser(null);
-        setUserCompany(null);
-        setSelectedTeam('');
-        setJoinedTeams([]);
-        setIsManager(false);
-      }
-    });
-
-    // Clean up the subscription on unmount
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-
-    const fetchUserData = async () => {
-      if (currentUser) {
-        await checkUserRole(currentUser);
-        await fetchTeam(currentUser);
-        await getUser(currentUser);
-      }
-    };
-
-  const fetchTeamUsers = async () => {
-    if (selectedTeam) {
-      const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
-      if (teamData && teamData.members) {
-        const usersDetails = await fetchUsersDetails(teamData.members);
-        setUsers(usersDetails);
-      }
-    }
-  };
-
- 
-  
-    fetchTeamUsers();
-  }, [currentUser, selectedTeam, joinedTeams, checkUserRole]);
-
   const fetchUsersDetails = useCallback(async (memberEmails) => {
     const usersRef = collection(db, 'users');
     const usersDetails = [];
@@ -222,10 +158,75 @@ function Tasks({ user }) {
       }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (currentUser) {
+        await checkUserRole(currentUser);
+        await fetchTeam(currentUser);
+        await getUser(currentUser);
+      }
+    };
+  
+    const fetchTeamUsers = async () => {
+      if (selectedTeam) {
+        const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
+        if (teamData && teamData.members) {
+          const usersDetails = await fetchUsersDetails(teamData.members);
+          setUsers(usersDetails);
+        }
+      }
+    };
+  
+    fetchData();
+    fetchTeamUsers();
+  }, [currentUser, selectedTeam, joinedTeams, checkUserRole, fetchTeam, fetchUsersDetails, getUser]);
+
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
+      if (authenticatedUser) {
+        // Set user state
+        setCurrentUser(authenticatedUser);
+
+        // Fetch teams and company data
+        fetchTeam(authenticatedUser);
+        getUserCompany(authenticatedUser);
+
+        // Check the user role
+        checkUserRole(authenticatedUser);
+      } else {
+        // Reset states when the user is not authenticated
+        setCurrentUser(null);
+        setUserCompany(null);
+        setSelectedTeam('');
+        setJoinedTeams([]);
+        setIsManager(false);
+      }
+    });
+
+    // Clean up the subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (currentUser) {
+        await checkUserRole(currentUser);
+        await fetchTeam(currentUser);
+        await getUser(currentUser);
+      }
+    };
+  
+  
+    fetchUserData(); 
+  }, [currentUser, selectedTeam, joinedTeams, checkUserRole, fetchTeam, fetchUsersDetails, getUser]);
+
+  
+  
+  
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -474,7 +475,8 @@ function Tasks({ user }) {
                     className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
                   />
                 </div>
-                <button onClick={closeModal} className="mt-4 bg-sky-300 hover:bg-cyan-200 text-white font-semibold px-6 py-3 rounded">
+                <button className="mt-4 bg-sky-300 hover:bg-cyan-200 text-white font-semibold px-6 py-3 rounded">
+                {/* onClick={addTask} */}
                   Add
                 </button>
               </form>
