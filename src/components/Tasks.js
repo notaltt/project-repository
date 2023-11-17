@@ -57,6 +57,68 @@ function Tasks({ user }) {
     }
   }, []);
 
+  const fetchTeam = useCallback(async (user) => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
+  
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const userTeams = userData.teams || [];
+  
+        const teamRef = collection(db, 'team');
+        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+        const teamSnapshot = await getDocs(teamQuery);
+  
+        const teams = [];
+  
+        for (const docSnapshot of teamSnapshot.docs) {
+          const teamData = docSnapshot.data();
+          const members = teamData.members || [];
+          const totalMembers = members.length;
+  
+          teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
+        }
+  
+        setJoinedTeams(teams);
+  
+        if (teams.length > 0) {
+          const selectedTeamName = teams[0].teamName;
+          setSelectedTeam(selectedTeamName);
+  
+          // Fetch users for the selected team
+          const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
+          if (selectedTeamData && selectedTeamData.members) {
+            const usersDetails = await fetchUsersDetails(selectedTeamData.members);
+            setUsers(usersDetails);
+          }
+        }
+      } 
+    } catch (error) {
+      console.error("Error fetching team:", error);
+    }
+  }, []);
+
+  const getUser = useCallback(async (user) => {
+    try{
+      const userData = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userData);
+
+      if(userDoc.exists()){
+        const userData = userDoc.data();
+        const userAvatar = userData.avatar;
+        const userName = userData.name;
+        const userRole = userData.role;
+
+        setUserName(userName);
+        setUserAvatar(userAvatar);
+        setUserRole(userRole);
+      }
+    }catch(e){
+
+    }
+  },[]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (currentUser) {
@@ -67,7 +129,7 @@ function Tasks({ user }) {
     };
   
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, checkUserRole, fetchTeam, getUser]);
 
   
   useEffect(() => {
@@ -121,48 +183,6 @@ function Tasks({ user }) {
     fetchTeamUsers();
   }, [currentUser, selectedTeam, joinedTeams, checkUserRole]);
 
-  const fetchTeam = async (user) => {
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnapshot = await getDoc(userRef);
-  
-      if (userSnapshot.exists()) {
-        const userData = userSnapshot.data();
-        const userTeams = userData.teams || [];
-  
-        const teamRef = collection(db, 'team');
-        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
-        const teamSnapshot = await getDocs(teamQuery);
-  
-        const teams = [];
-  
-        for (const docSnapshot of teamSnapshot.docs) {
-          const teamData = docSnapshot.data();
-          const members = teamData.members || [];
-          const totalMembers = members.length;
-  
-          teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
-        }
-  
-        setJoinedTeams(teams);
-  
-        if (teams.length > 0) {
-          const selectedTeamName = teams[0].teamName;
-          setSelectedTeam(selectedTeamName);
-  
-          // Fetch users for the selected team
-          const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
-          if (selectedTeamData && selectedTeamData.members) {
-            const usersDetails = await fetchUsersDetails(selectedTeamData.members);
-            setUsers(usersDetails);
-          }
-        }
-      } 
-    } catch (error) {
-      console.error("Error fetching team:", error);
-    }
-  };
-
   const fetchUsersDetails = useCallback(async (memberEmails) => {
     const usersRef = collection(db, 'users');
     const usersDetails = [];
@@ -182,29 +202,6 @@ function Tasks({ user }) {
   }, []);
 
   
-
-
-
-  const getUser = async (user) => {
-    try{
-      const userData = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userData);
-
-      if(userDoc.exists()){
-        const userData = userDoc.data();
-        const userAvatar = userData.avatar;
-        const userName = userData.name;
-        const userRole = userData.role;
-
-        setUserName(userName);
-        setUserAvatar(userAvatar);
-        setUserRole(userRole);
-      }
-    }catch(e){
-
-    }
-  };
-
   const getUserCompany = async (user) => {
   try {
       const userRef = doc(db, 'users', user.uid);
