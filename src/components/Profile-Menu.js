@@ -15,6 +15,10 @@ const ProfileMenu = () => {
     const auth = UserAuth();
     const [userData, setUserData] = useState(null);
 
+    useEffect(() => {
+      fetchUserData();
+    },);
+
     const fetchUserData = async () => {
       if (auth && auth.user && auth.user.uid) {
         const firestore = getFirestore();
@@ -31,23 +35,23 @@ const ProfileMenu = () => {
           console.error('Error fetching user data:', error);
         }
       }
-    }; fetchUserData();
+    }; 
    
-        useEffect(() => {
-            if (currentUser?.photoURL) {
-              setPhotoURL(currentUser.photoURL);
-            }
-          }, [currentUser])
-  
-          const handleLogout = async () => {
-            try {
-              await logout();
-              navigate('/login');
-              console.log('You are logged out')
-            } catch (e) {
-              console.log(e.message);
-            }
-          };
+    useEffect(() => {
+        if (currentUser?.photoURL) {
+          setPhotoURL(currentUser.photoURL);
+        }
+      }, [currentUser])
+
+      const handleLogout = async () => {
+        try {
+          await logout();
+          navigate('/login');
+          console.log('You are logged out')
+        } catch (e) {
+          console.log(e.message);
+        }
+      };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
