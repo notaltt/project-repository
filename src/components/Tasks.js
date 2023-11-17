@@ -6,8 +6,8 @@ import {generateDate, months } from '../components-additional/GenerateDate';
 import dayjs from "dayjs";
 import cn from '../components-additional/cn'
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
-import { firestore as db, addDoc } from './firebase'; 
-import { getDoc, doc, collection, getDocs, query, where } from 'firebase/firestore';
+import { firestore as db } from './firebase'; 
+import { getDoc, doc, collection, getDocs, query, where, addDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../../src/components/firebase';
 
@@ -44,18 +44,40 @@ function Tasks({ user }) {
 
         if (userRole === "manager") {
           setIsManager(true);
-          console.log(userRole);
-          console.log("User is a manager");
+          // console.log(userRole);
+          // console.log("User is a manager");
         } else if (userRole === "member") {
           setIsManager(false);
-          console.log(userRole);
-          console.log("User is a member");
+          // console.log(userRole);
+          // console.log("User is a member");
         }
       }
     } catch (error) {
       console.error("Error checking user role:", error);
     }
   }, []);
+
+  
+  const addTask = async () => {
+    try {
+      // Create a reference to the "tasks" collection in Firestore
+      const tasksCollection = collection(db, 'tasks');
+
+      // Add a new document to the "tasks" collection with task details
+      await addDoc(tasksCollection, {
+        team: selectedTeam,
+        taskName: taskName,
+        date: taskDate,
+        assignedUser: selectedUserEmail,
+        description: taskDescription,
+      });
+
+      // Close the modal after adding the task
+      closeModal();
+    } catch (error) {
+      console.error('Error adding task:', error);
+    }
+  };
 
   const fetchTeam = useCallback(async (user) => {
     try {
@@ -254,31 +276,31 @@ function Tasks({ user }) {
         <div className="flex md:justify-center flex-1 lg:mr-32">
               <div className=" relative w-40 justify-center md:w-full max-w-xl mr-6 focus-within:text-purple-500">
               <div>
-                <select
-                  className="w-full pl-8 pr-2 text-large dark:text-black text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 
-                  dark:bg-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input"
-                  aria-label="Choose Team"
-                  value={selectedTeam} // Control the selected value with React state
-                  onChange={(e) => {
-                    console.log('Selected team:', e.target.value);
-                    const selectedId = e.target.value;
-                    const team = joinedTeams.find((team) => team.id === selectedId);
-                    setSelectedTeam(team ? team.teamName : ''); // Update the state based on selected option
-                  }}
-                  id="team-select"
-                >
-                  {joinedTeams && joinedTeams.length > 0 ? (
-                        joinedTeams.map((team) => (
-                          <option key={team.id}>
-                            {team.teamName}
-                          </option>
-                        ))
-                  ): (
-                    <div>
-                        No teams available or you're not part of any teams.
-                    </div>
-                  )}
-                </select>
+              <select
+                className="w-full pl-8 pr-2 text-large dark:text-black text-black placeholder-blue-600 bg-gray-200 border-0 rounded-md dark:placeholder-gray-500 dark:focus:shadow-outline-blue dark:focus:placeholder-gray-600 
+                dark:bg-gray-200 focus:placeholder-gray-500 focus:bg-white focus:border-red-300 focus:outline-none focus:shadow-outline-purple focus:text-blue-500 form-input"
+                aria-label="Choose Team"
+                value={selectedTeam}
+                onChange={(e) => {
+                  console.log('Selected team:', e.target.value);
+                  const selectedId = e.target.value;
+                  const team = joinedTeams.find((team) => team.id === selectedId);
+                  setSelectedTeam(team ? team.teamName : '');
+                }}
+                id="team-select"
+              >
+              {joinedTeams && joinedTeams.length > 0 ? (
+                joinedTeams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.teamName}
+                  </option>
+                ))
+              ) : (
+                <div>
+                  No teams available or you're not part of any teams.
+                </div>
+              )}
+              </select>
             </div>
             </div> 
             <div>
@@ -475,8 +497,7 @@ function Tasks({ user }) {
                     className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
                   />
                 </div>
-                <button className="mt-4 bg-sky-300 hover:bg-cyan-200 text-white font-semibold px-6 py-3 rounded">
-                {/* onClick={addTask} */}
+                <button onClick={addTask} className="mt-4 bg-sky-300 hover:bg-cyan-200 text-white font-semibold px-6 py-3 rounded">
                   Add
                 </button>
               </form>
