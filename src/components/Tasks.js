@@ -33,6 +33,30 @@ function Tasks({ user }) {
   const [taskDate, setTaskDate] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
 
+  const checkUserRole = useCallback(async (user) => {
+    try {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnapshot = await getDoc(userDocRef);
+
+      if (userDocSnapshot.exists()) {
+        const userData = userDocSnapshot.data();
+        const userRole = userData.role;
+
+        if (userRole === "manager") {
+          setIsManager(true);
+          console.log(userRole);
+          console.log("User is a manager");
+        } else if (userRole === "member") {
+          setIsManager(false);
+          console.log(userRole);
+          console.log("User is a member");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking user role:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       if (currentUser) {
@@ -82,16 +106,18 @@ function Tasks({ user }) {
       }
     };
 
-    const fetchTeamUsers = async () => {
-      if (selectedTeam) {
-        const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
-        if (teamData && teamData.members) {
-          const usersDetails = await fetchUsersDetails(teamData.members);
-          setUsers(usersDetails);
-        }
+  const fetchTeamUsers = async () => {
+    if (selectedTeam) {
+      const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
+      if (teamData && teamData.members) {
+        const usersDetails = await fetchUsersDetails(teamData.members);
+        setUsers(usersDetails);
       }
-    };
+    }
+  };
 
+ 
+  
     fetchTeamUsers();
   }, [currentUser, selectedTeam, joinedTeams, checkUserRole]);
 
@@ -137,31 +163,6 @@ function Tasks({ user }) {
     }
   };
 
-  const checkUserRole = useCallback(async (user) => {
-    try {
-      const userDocRef = doc(db, "users", user.uid);
-      const userDocSnapshot = await getDoc(userDocRef);
-  
-      if (userDocSnapshot.exists()) {
-        const userData = userDocSnapshot.data();
-        const userRole = userData.role;
-  
-        if (userRole === "manager") {
-          setIsManager(true);
-          console.log(userRole);
-          console.log("User is a manager");
-        }
-        else if(userRole === "member"){
-          setIsManager(false);
-          console.log(userRole);
-          console.log("User is a member");
-        }
-      }
-    } catch (error) {
-      console.error("Error checking user role:", error);
-    }
-  }, []);
-  
   const fetchUsersDetails = useCallback(async (memberEmails) => {
     const usersRef = collection(db, 'users');
     const usersDetails = [];
