@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SideBar from './SideBar';
 import Profile from './Profile-Menu';
 import DarkMode from './DarkMode';
@@ -29,22 +29,37 @@ function Tasks({ user }) {
   const [userRole, setUserRole] = useState('');
   const [users, setUsers] = useState([]);
   const [selectedUserEmail, setSelectedUserEmail] = useState('');
+  const [taskName, setTaskName] = useState('');
+  const [taskDate, setTaskDate] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (currentUser) {
+        await checkUserRole(currentUser);
+        await fetchTeam(currentUser);
+        await getUser(currentUser);
+      }
+    };
+  
+    fetchData();
+  }, [currentUser]);
+
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
       if (authenticatedUser) {
         // Set user state
         setCurrentUser(authenticatedUser);
-        
-        
+
         // Fetch teams and company data
         fetchTeam(authenticatedUser);
         getUserCompany(authenticatedUser);
-        
+
         // Check the user role
         checkUserRole(authenticatedUser);
       } else {
-        // Reset states when user is not authenticated
+        // Reset states when the user is not authenticated
         setCurrentUser(null);
         setUserCompany(null);
         setSelectedTeam('');
@@ -52,12 +67,77 @@ function Tasks({ user }) {
         setIsManager(false);
       }
     });
-  
+
     // Clean up the subscription on unmount
     return () => unsubscribe();
-  }, []); 
+  }, []);
 
-  const checkUserRole = async (user) => {
+  useEffect(() => {
+
+    const fetchUserData = async () => {
+      if (currentUser) {
+        await checkUserRole(currentUser);
+        await fetchTeam(currentUser);
+        await getUser(currentUser);
+      }
+    };
+
+    const fetchTeamUsers = async () => {
+      if (selectedTeam) {
+        const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
+        if (teamData && teamData.members) {
+          const usersDetails = await fetchUsersDetails(teamData.members);
+          setUsers(usersDetails);
+        }
+      }
+    };
+
+    fetchTeamUsers();
+  }, [currentUser, selectedTeam, joinedTeams, checkUserRole]);
+
+  const fetchTeam = async (user) => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
+  
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const userTeams = userData.teams || [];
+  
+        const teamRef = collection(db, 'team');
+        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+        const teamSnapshot = await getDocs(teamQuery);
+  
+        const teams = [];
+  
+        for (const docSnapshot of teamSnapshot.docs) {
+          const teamData = docSnapshot.data();
+          const members = teamData.members || [];
+          const totalMembers = members.length;
+  
+          teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
+        }
+  
+        setJoinedTeams(teams);
+  
+        if (teams.length > 0) {
+          const selectedTeamName = teams[0].teamName;
+          setSelectedTeam(selectedTeamName);
+  
+          // Fetch users for the selected team
+          const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
+          if (selectedTeamData && selectedTeamData.members) {
+            const usersDetails = await fetchUsersDetails(selectedTeamData.members);
+            setUsers(usersDetails);
+          }
+        }
+      } 
+    } catch (error) {
+      console.error("Error fetching team:", error);
+    }
+  };
+
+  const checkUserRole = useCallback(async (user) => {
     try {
       const userDocRef = doc(db, "users", user.uid);
       const userDocSnapshot = await getDoc(userDocRef);
@@ -80,9 +160,9 @@ function Tasks({ user }) {
     } catch (error) {
       console.error("Error checking user role:", error);
     }
-  };
+  }, []);
   
-  const fetchUsersDetails = async (memberEmails) => {
+  const fetchUsersDetails = useCallback(async (memberEmails) => {
     const usersRef = collection(db, 'users');
     const usersDetails = [];
   
@@ -98,65 +178,9 @@ function Tasks({ user }) {
   
     console.log('Users details:', usersDetails);
     return usersDetails;
-  };
+  }, []);
 
-  const fetchTeam = async (user) => {
-    const teams = [];
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnapshot = await getDoc(userRef);
   
-      if (userSnapshot.exists()) {
-        const userData = userSnapshot.data();
-        const userTeams = userData.teams || [];
-  
-        const teamRef = collection(db, 'team');
-        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
-        const teamSnapshot = await getDocs(teamQuery);
-  
-        teamSnapshot.forEach((docSnapshot) => {
-          const teamData = docSnapshot.data();
-          const members = teamData.members || [];
-          const totalMembers = members.length;
-  
-          teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
-        });
-  
-        // After fetching teams, set the joined teams and select the first team
-        setJoinedTeams(teams);
-        if (teams.length > 0) {
-          const selectedTeamName = teams[0].teamName;
-          setSelectedTeam(selectedTeamName); // Update the selected team
-          
-          // Fetch users for the selected team
-          const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
-          if (selectedTeamData && selectedTeamData.members) {
-            const usersDetails = await fetchUsersDetails(selectedTeamData.members);
-            setUsers(usersDetails); // Update the users state
-          }
-        }
-      } 
-    } catch (error) {
-      console.error("Error fetching team:", error);
-    }
-  };
-  
-
-  useEffect(() => {
-    const fetchTeamUsers = async () => {
-      console.log('Fetching users for team:', selectedTeam);
-      if (selectedTeam) {
-        // Find the team data in joinedTeams
-        const teamData = joinedTeams.find(t => t.teamName === selectedTeam);
-        if (teamData && teamData.members) {
-          const usersDetails = await fetchUsersDetails(teamData.members);
-          setUsers(usersDetails); // set the users state
-        }
-      }
-    };
-  
-    fetchTeamUsers();
-  }, [selectedTeam, joinedTeams]);
 
 
 
@@ -399,6 +423,8 @@ function Tasks({ user }) {
                         id="taskName"
                         name="taskName"
                         type="text"
+                        value={taskName}
+                        onChange={(e) => setTaskName(e.target.value)}
                         required
                         className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
                       />
@@ -414,6 +440,8 @@ function Tasks({ user }) {
                         id="date"
                         name="date"
                         type="date"
+                        value={taskDate}
+                        onChange={(e) => setTaskDate(e.target.value)}
                         required
                         className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
                       />
@@ -442,6 +470,8 @@ function Tasks({ user }) {
                     placeholder="Description of Task"
                     id="description"
                     name="description"
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
                     required
                     className="block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 text-lg sm:text-sm sm:leading-6"
                   />
