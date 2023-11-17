@@ -79,35 +79,54 @@ function Tasks({ user }) {
     }
   };
 
+  const fetchUsersDetails = useCallback(async (memberEmails) => {
+    const usersRef = collection(db, 'users');
+    const usersDetails = [];
+  
+    for (const email of memberEmails) {
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+      
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        usersDetails.push(doc.data());
+      });
+    }
+  
+    console.log('Users details:', usersDetails);
+    return usersDetails;
+  }, []);
+
+
   const fetchTeam = useCallback(async (user) => {
     try {
       const userRef = doc(db, 'users', user.uid);
       const userSnapshot = await getDoc(userRef);
-  
+
       if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
         const userTeams = userData.teams || [];
-  
+
         const teamRef = collection(db, 'team');
         const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
         const teamSnapshot = await getDocs(teamQuery);
-  
+
         const teams = [];
-  
+
         for (const docSnapshot of teamSnapshot.docs) {
           const teamData = docSnapshot.data();
           const members = teamData.members || [];
           const totalMembers = members.length;
-  
+
           teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
         }
-  
+
         setJoinedTeams(teams);
-  
+
         if (teams.length > 0) {
           const selectedTeamName = teams[0].teamName;
           setSelectedTeam(selectedTeamName);
-  
+
           // Fetch users for the selected team
           const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
           if (selectedTeamData && selectedTeamData.members) {
@@ -115,11 +134,13 @@ function Tasks({ user }) {
             setUsers(usersDetails);
           }
         }
-      } 
+
+        setIsLoading(false); // Set loading to false after fetching team data
+      }
     } catch (error) {
       console.error("Error fetching team:", error);
     }
-  }, []);
+  }, [fetchUsersDetails]);
 
   const getUser = useCallback(async (user) => {
     try{
@@ -141,44 +162,27 @@ function Tasks({ user }) {
     }
   },[]);
 
-  const fetchUsersDetails = useCallback(async (memberEmails) => {
-    const usersRef = collection(db, 'users');
-    const usersDetails = [];
   
-    for (const email of memberEmails) {
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-      
-      querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        usersDetails.push(doc.data());
-      });
-    }
-  
-    console.log('Users details:', usersDetails);
-    return usersDetails;
-  }, []);
-
-  
-  const getUserCompany = async (user) => {
-  try {
+  const getUserCompany = useCallback(async (user) => {
+    try {
       const userRef = doc(db, 'users', user.uid);
       const userUid = await getDoc(userRef);
 
       if (userUid.exists) {
-          const userData = userUid.data();
-          const userCompany = userData.company;
-          setUserCompany(userCompany);
-          setIsLoading(false);
+        const userData = userUid.data();
+        const userCompany = userData.company;
+        setUserCompany(userCompany);
+        setIsLoading(false);
       } else {
-          console.log('User document not found');
-          setUserCompany();
+        console.log('User document not found');
+        setUserCompany();
       }
-      } catch (error) {
-          console.error('Error fetching user data:', error);
-          setUserCompany();
-      }
-  };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setUserCompany();
+    }
+  }, []);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -188,7 +192,11 @@ function Tasks({ user }) {
         await getUser(currentUser);
       }
     };
-  
+
+    fetchData();
+  }, [currentUser, checkUserRole, fetchTeam, getUser]);
+
+  useEffect(() => {
     const fetchTeamUsers = async () => {
       if (selectedTeam) {
         const teamData = joinedTeams.find((t) => t.teamName === selectedTeam);
@@ -198,10 +206,9 @@ function Tasks({ user }) {
         }
       }
     };
-  
-    fetchData();
+
     fetchTeamUsers();
-  }, [currentUser, selectedTeam, joinedTeams, checkUserRole, fetchTeam, fetchUsersDetails, getUser]);
+  }, [selectedTeam, joinedTeams, fetchUsersDetails]);
 
   
   useEffect(() => {
@@ -228,23 +235,9 @@ function Tasks({ user }) {
 
     // Clean up the subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [fetchTeam, getUserCompany, checkUserRole]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (currentUser) {
-        await checkUserRole(currentUser);
-        await fetchTeam(currentUser);
-        await getUser(currentUser);
-      }
-    };
-  
-  
-    fetchUserData(); 
-  }, [currentUser, selectedTeam, joinedTeams, checkUserRole, fetchTeam, fetchUsersDetails, getUser]);
 
-  
-  
   
   if (isLoading) {
     return <div>Loading...</div>;
