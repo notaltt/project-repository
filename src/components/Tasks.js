@@ -24,11 +24,11 @@ function Tasks({ user }) {
   const [joinedTeams, setJoinedTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState('');
   const [isManager, setIsManager] = useState(false);
-  const [selectedUser, setSelectedUser] = useState("");
   const [userName, setUserName] = useState('');
   const [userAvatar, setUserAvatar] = useState('');
   const [userRole, setUserRole] = useState('');
   const [users, setUsers] = useState([]);
+  const [selectedUserEmail, setSelectedUserEmail] = useState('');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (authenticatedUser) => {
@@ -82,43 +82,81 @@ function Tasks({ user }) {
     }
   };
   
-
+  const fetchUsersDetails = async (memberEmails) => {
+    const usersRef = collection(db, 'users');
+    const usersDetails = [];
+  
+    for (const email of memberEmails) {
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+      
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        usersDetails.push(doc.data());
+      });
+    }
+  
+    console.log('Users details:', usersDetails);
+    return usersDetails;
+  };
 
   const fetchTeam = async (user) => {
     const teams = [];
     try {
       const userRef = doc(db, 'users', user.uid);
       const userSnapshot = await getDoc(userRef);
-
+  
       if (userSnapshot.exists()) {
-          const userData = userSnapshot.data();
-          const userTeams = userData.teams || [];
-
-          const teamRef = collection(db, 'team');
-          const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
-          const teamSnapshot = await getDocs(teamQuery);
-
-          teamSnapshot.forEach((doc) => {
-          const teamData = doc.data();
+        const userData = userSnapshot.data();
+        const userTeams = userData.teams || [];
+  
+        const teamRef = collection(db, 'team');
+        const teamQuery = query(teamRef, where('teamName', 'array-contains-any', userTeams));
+        const teamSnapshot = await getDocs(teamQuery);
+  
+        teamSnapshot.forEach((docSnapshot) => {
+          const teamData = docSnapshot.data();
           const members = teamData.members || [];
           const totalMembers = members.length;
-
-          teams.push({ id: doc.id, ...teamData, totalMembers });
-          });
-          if (userSnapshot.exists()) {
-            const userData = userSnapshot.data();
-            const userTeams = userData.teams || [];
-            // ...existing code to push teams...
-            if (teams.length > 0) {
-              setSelectedTeam(teams[0].teamName);
-            }
+  
+          teams.push({ id: docSnapshot.id, ...teamData, totalMembers });
+        });
+  
+        // After fetching teams, set the joined teams and select the first team
+        setJoinedTeams(teams);
+        if (teams.length > 0) {
+          const selectedTeamName = teams[0].teamName;
+          setSelectedTeam(selectedTeamName); // Update the selected team
+          
+          // Fetch users for the selected team
+          const selectedTeamData = teams.find(t => t.teamName === selectedTeamName);
+          if (selectedTeamData && selectedTeamData.members) {
+            const usersDetails = await fetchUsersDetails(selectedTeamData.members);
+            setUsers(usersDetails); // Update the users state
           }
+        }
       } 
     } catch (error) {
-    console.error("Error fetching team:", error);
+      console.error("Error fetching team:", error);
     }
-    setJoinedTeams(teams);
   };
+  
+
+  useEffect(() => {
+    const fetchTeamUsers = async () => {
+      console.log('Fetching users for team:', selectedTeam);
+      if (selectedTeam) {
+        // Find the team data in joinedTeams
+        const teamData = joinedTeams.find(t => t.teamName === selectedTeam);
+        if (teamData && teamData.members) {
+          const usersDetails = await fetchUsersDetails(teamData.members);
+          setUsers(usersDetails); // set the users state
+        }
+      }
+    };
+  
+    fetchTeamUsers();
+  }, [selectedTeam, joinedTeams]);
 
 
 
@@ -182,7 +220,7 @@ function Tasks({ user }) {
   };
 
   const handleUserChange = (event) => {
-    setSelectedUser(event.target.value);
+    setSelectedUserEmail(event.target.value);
   };
 
   return(
@@ -199,6 +237,7 @@ function Tasks({ user }) {
                   aria-label="Choose Team"
                   value={selectedTeam} // Control the selected value with React state
                   onChange={(e) => {
+                    console.log('Selected team:', e.target.value);
                     const selectedId = e.target.value;
                     const team = joinedTeams.find((team) => team.id === selectedId);
                     setSelectedTeam(team ? team.teamName : ''); // Update the state based on selected option
@@ -381,11 +420,11 @@ function Tasks({ user }) {
                     </div>
                   </div>
                   <div className='flex-1'>
-                  <label htmlFor="date" className="flex text-lg font-medium leading-6 dark:text-white text-gray-900 items-stretch">
+                    <label htmlFor="date" className="flex text-lg font-medium leading-6 dark:text-white text-gray-900 items-stretch">
                       Assign a user
                     </label>
                     <div className='mt-2'>
-                    <select name='users' id='users' onChange={handleUserChange} className="block w-full px-4 py-2 border rounded-lg mt-1">
+                    <select name='users' id='users' value={selectedUserEmail} onChange={handleUserChange} className="block w-full px-4 py-2 border rounded-lg mt-1">
                       {users.map((user, index) => (
                         <option key={index} value={user.email}>
                           {user.name} ({user.email})
