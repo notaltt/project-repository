@@ -9,6 +9,8 @@ import { firestore as db } from './firebase';
 import { auth } from '../../src/components/firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs, where, query, doc,  getDoc } from "firebase/firestore";
+import myImage from '../images/logoOpacity.png';
+
 
 export default function Files(){
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -107,7 +109,7 @@ export default function Files(){
     };
   
     return(
-        <div className="flex bg-white dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }">  
+        <div className="flex bg-no-repeat bg-right-bottom dark:bg-gray-950 h-screen overflow-hidden': isSideMenuOpen }" style={{ backgroundImage: `url(${myImage})` }}>   
            
            <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
@@ -189,8 +191,26 @@ export default function Files(){
                             <FileList company={userCompany} team={teamName} />
                         </div>
                     ) : (
-                        <div>
-                            Click a team...
+                        <div className="my-4 p-2 border rounded-lg bg-white mx-auto inline-block">
+                            <div className='bg-slate-50 p-2 rounded-lg'>
+                                <div className="text-xl">CLICK AVAILABLE TEAMS</div>
+                                <div className="flex items-center">
+                                    <div className="flex-1 border-t border-gray-300"></div>
+                                    <div className="mx-4 text-gray-500">OR</div>
+                                    <div className="flex-1 border-t border-gray-300"></div>
+                                </div>
+                                <div className="text-xl">JOIN A TEAM</div>
+                                <div className='flex'>
+                                    <input
+                                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                                        type="text"
+                                        placeholder="Enter Team Code"
+                                    />
+                                    <button className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-md">
+                                        JOIN
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
