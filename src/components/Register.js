@@ -9,8 +9,6 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../src/components/firebase';
 import { Link } from 'react-router-dom';
-import { Toaster, toast } from 'sonner'
-
 
 
 export default function Register() {
@@ -105,7 +103,7 @@ export default function Register() {
     e.preventDefault();
     
     if (!validatePassword(password)) {
-      toast.error("Password must be at least 8 characters long, contain an uppercase and lowercase letter, a number, and a special character.");
+      alert("Password must be at least 8 characters long, contain an uppercase and lowercase letter, a number, and a special character.");
       return;
     }
 
@@ -136,7 +134,7 @@ export default function Register() {
 
     try {
       setIsSubmitting(true);
-
+      
       // Create a new user with Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   
@@ -169,7 +167,6 @@ export default function Register() {
       setConfirmPassword("");
       setCompany("");
       setIsSubmitting(false);
-      toast.success("Registered");
       navigate("/dashboard");
     } catch (error) {
       console.error("Error registering user:", error.message);   
@@ -187,7 +184,7 @@ export default function Register() {
 
 return (
   <>
-    <Toaster position="top-center" richColors />
+    
       <div className="flex relative flex-1 h-screen dark:bg-gray-900 bg-white flex-col px-6 py-12 lg:px-8">
         <div className='absolute right-5 top-5'>
           <DarkMode/> 
