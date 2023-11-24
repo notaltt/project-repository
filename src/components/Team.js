@@ -122,7 +122,8 @@ export default function Team() {
       //   .where('time', '<', thresholdTime)
       //   .get();
 
-      const querySnapshot = query(inviteRef, where("time", "<", thresholdTime));
+      const q = query(inviteRef, where("time", "<", thresholdTime));
+      const querySnapshot = await getDocs(q);
   
       // Delete the documents that meet the criteria
       const batch = writeBatch(db);
